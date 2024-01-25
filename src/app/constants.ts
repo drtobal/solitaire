@@ -2,6 +2,8 @@ export const DECK_SIZE = 13;
 
 export const DECKS = 4;
 
+export const PILES = 7;
+
 export enum CardTypeL {
     club = 'club',
     diamond = 'diamond',

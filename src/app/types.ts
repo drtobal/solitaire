@@ -10,13 +10,10 @@ export type Card = {
     number: CardNumber;
 };
 
-export type Piles = [Card[], Card[], Card[], Card[], Card[], Card[], Card[]];
-
-export type Foundations = [Card[], Card[], Card[], Card[]];
-
 export type GameSlots = {
     stock: Card[],
     activeStock: Card[],
-    piles: Piles,
-    foundations: Foundations,
+    solvedPiles: Card[][],
+    piles: Card[][],
+    foundations: Card[][],
 };

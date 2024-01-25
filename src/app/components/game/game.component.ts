@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { Card, Foundations, Piles } from '../../types';
+import { Card } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 
 @Component({
@@ -19,9 +19,11 @@ export class GameComponent implements OnInit {
 
   activeStock: Card[] = [];
 
-  piles: Piles = [[], [], [], [], [], [], []];
+  piles: Card[][] = [];
 
-  foundatinos: Foundations = [[], [], [], []];
+  solvedPiles: Card[][] = [];
+
+  foundatinos: Card[][] = [];
 
   constructor(
     private deckService: DeckService,
@@ -32,7 +34,7 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      console.log(this.deckService.generateDecks());
+      console.log(this.deckService.generateGame());
     }
   }
 }
