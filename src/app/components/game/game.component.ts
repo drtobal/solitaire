@@ -1,12 +1,14 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { Card } from '../../types';
+import { AnyObject, Card } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
+import { PileComponent } from '../pile/pile.component';
+import { CARD_SPACE } from '../../constants';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PileComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,7 +36,16 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      console.log(this.deckService.generateGame());
+      const game = this.deckService.generateGame();
+      this.stock = game.stock;
+      this.activeStock = game.activeStock;
+      this.piles = game.piles;
+      this.solvedPiles = game.solvedPiles;
+      this.foundatinos = game.foundations;
     }
+  }
+
+  getSolvedPileStyle(offset: number): AnyObject {
+    return { top: `${offset * CARD_SPACE}rem` };
   }
 }

@@ -1,0 +1,19 @@
+@if (!visible) {
+<div class="card hidden"></div>
+} @else {
+@if (card) {
+<div class="card">
+    <div class="card-inner">
+        <p class="number">{{card.number}}</p>
+        <p class="type">
+            @switch (card.type) {
+                @case (cardTypes.club) { ♣️ }
+                @case (cardTypes.diamond) { ♦️ }
+                @case (cardTypes.heart) { ♥️ }
+                @case (cardTypes.spade) { ♠️ }
+            }
+        </p>
+    </div>
+</div>
+}
+}

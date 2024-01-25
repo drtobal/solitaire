@@ -1,0 +1,8 @@
+.piles {
+    display: flex;
+    gap: 1rem;
+}
+
+.pile {
+    width: var(--card-width);
+}

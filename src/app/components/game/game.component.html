@@ -1,0 +1,9 @@
+<div class="piles">
+    @for (pile of piles; track index; let index = $index) {
+    <div class="pile">
+        <app-pile [cards]="pile" [stacked]="false"></app-pile>
+        <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" [cards]="solvedPiles[index]" [stacked]="false"
+            [visible]="true"></app-pile>
+    </div>
+    }
+</div>
