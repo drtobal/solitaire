@@ -1,6 +1,6 @@
 <div class="top">
     @for (foundation of foundations; track $index) {
-        <app-pile [cards]="foundation" [visible]="true"></app-pile>
+    <app-pile [cards]="foundation" [visible]="true"></app-pile>
     }
     <div class="separator"></div>
     <app-pile [cards]="activeStock" [visible]="true"></app-pile>
@@ -11,8 +11,8 @@
     @for (pile of piles; track index; let index = $index) {
     <div class="pile">
         <app-pile [cards]="pile" [stacked]="false"></app-pile>
-        <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" [cards]="solvedPiles[index]" [stacked]="false"
-            [visible]="true"></app-pile>
+        <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" (click)="solvePile(index)"
+            [cards]="solvedPiles[index]" [stacked]="false" [visible]="true"></app-pile>
     </div>
     }
 </div>

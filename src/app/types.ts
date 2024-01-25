@@ -21,3 +21,7 @@ export type GameSlots = {
     piles: Card[][],
     foundations: Card[][],
 };
+
+export interface GameMoved extends GameSlots {
+    moved: boolean;
+}

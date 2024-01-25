@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card } from '../../types';
+import { AnyObject, Card, GameSlots } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { CARD_SPACE } from '../../constants';
@@ -37,12 +37,7 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      const game = this.deckService.generateGame();
-      this.stock = game.stock;
-      this.activeStock = game.activeStock;
-      this.piles = game.piles;
-      this.solvedPiles = game.solvedPiles;
-      this.foundations = game.foundations;
+      this.setGameSlots(this.deckService.generateGame());
     }
   }
 
@@ -65,5 +60,48 @@ export class GameComponent implements OnInit {
     }
 
     this.changeDetectorRef.detectChanges();
+  }
+
+  getLastCard(...piles: Card[][]): Card | null {
+    return this.deckService.getLastCardFromPiles(...piles);
+  }
+
+  solvePile(index: number): void {
+    const pileLength = this.solvedPiles[index].length;
+    if (pileLength > 0) {
+      const lastCard = this.solvedPiles[index][pileLength - 1];
+      if (lastCard) {
+        const result = this.deckService.completeCard(this.getGameSlots(), lastCard);
+        if (result.moved) {
+          this.setGameSlots(result);
+          this.solvedPiles[index].pop();
+          this.solvedPiles[index] = [...this.solvedPiles[index]];
+        }
+      }
+    }
+  }
+
+  completeCard(card?: Card | null): void {
+    const result = this.deckService.completeCard(this.getGameSlots(), card);
+    console.log(result);
+    this.setGameSlots(result);
+  }
+
+  getGameSlots(): GameSlots {
+    return {
+      stock: this.stock,
+      activeStock: this.activeStock,
+      piles: this.piles,
+      solvedPiles: this.solvedPiles,
+      foundations: this.foundations,
+    };
+  }
+
+  setGameSlots(slots: GameSlots): void {
+    this.stock = slots.stock;
+    this.activeStock = slots.activeStock;
+    this.piles = slots.piles;
+    this.solvedPiles = slots.solvedPiles;
+    this.foundations = slots.foundations;
   }
 }
