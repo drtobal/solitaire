@@ -25,7 +25,7 @@ export class GameComponent implements OnInit {
 
   solvedPiles: Card[][] = [];
 
-  foundatinos: Card[][] = [];
+  foundations: Card[][] = [];
 
   constructor(
     private deckService: DeckService,
@@ -41,7 +41,7 @@ export class GameComponent implements OnInit {
       this.activeStock = game.activeStock;
       this.piles = game.piles;
       this.solvedPiles = game.solvedPiles;
-      this.foundatinos = game.foundations;
+      this.foundations = game.foundations;
     }
   }
 

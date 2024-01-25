@@ -1,6 +1,21 @@
-.piles {
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.piles,
+.top {
     display: flex;
     gap: 1rem;
+}
+
+.piles {
+    justify-content: space-between;
+}
+
+.separator {
+    flex-grow: 1;
 }
 
 .pile {

@@ -1,3 +1,12 @@
+<div class="top">
+    @for (foundation of foundations; track $index) {
+        <app-pile [cards]="foundation" [visible]="true"></app-pile>
+    }
+    <div class="separator"></div>
+    <app-pile [cards]="activeStock" [visible]="true"></app-pile>
+    <app-pile [cards]="stock" [visible]="false"></app-pile>
+</div>
+
 <div class="piles">
     @for (pile of piles; track index; let index = $index) {
     <div class="pile">

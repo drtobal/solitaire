@@ -1,6 +1,9 @@
 :host {
     position: relative;
+    min-height: var(--card-height);
     width: var(--card-width);
+    border-radius: 0.5rem;
+    background-color: whitesmoke;
 }
 
 .stacked {

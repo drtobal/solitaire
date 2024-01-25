@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Card, CardColor, CardNumber, CardType, GameSlots } from '../../types';
-import { CardColorL, CardTypeL, DECK_SIZE, PILES } from '../../constants';
+import { CardColorL, CardTypeL, DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class DeckService {
       activeStock: [],
       piles: pilesResult.piles,
       solvedPiles: pilesResult.solvedPiles,
-      foundations: [],
+      foundations: this.fillArray<Card>([], DECKS),
     };
     return gameSlots;
   }
