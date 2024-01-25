@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { AnyObject, Card } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
@@ -29,6 +29,7 @@ export class GameComponent implements OnInit {
 
   constructor(
     private deckService: DeckService,
+    private changeDetectorRef: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: string,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -47,5 +48,22 @@ export class GameComponent implements OnInit {
 
   getSolvedPileStyle(offset: number): AnyObject {
     return { top: `${offset * CARD_SPACE}rem` };
+  }
+
+  takeStock(): void {
+    if (this.stock.length > 0) {
+      const card = this.stock.shift();
+      if (card) {
+        this.activeStock.push(card);
+      }
+
+      this.stock = [...this.stock];
+      this.activeStock = [...this.activeStock];
+    } else {
+      this.stock = [...this.activeStock];
+      this.activeStock = [];
+    }
+
+    this.changeDetectorRef.detectChanges();
   }
 }

@@ -4,7 +4,7 @@
     }
     <div class="separator"></div>
     <app-pile [cards]="activeStock" [visible]="true"></app-pile>
-    <app-pile [cards]="stock" [visible]="false"></app-pile>
+    <app-pile [cards]="stock" [visible]="false" (click)="takeStock()"></app-pile>
 </div>
 
 <div class="piles">
