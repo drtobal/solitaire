@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots, GameTakeableStock } from '../../types';
+import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots, SolveFrom, SolveTo, SpliceCards } from '../../types';
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
@@ -72,171 +72,149 @@ export class DeckService {
     return deck;
   }
 
-  // getLastCardFromPiles(...piles: Card[][]): Card | null {
-  //   for (let x = piles.length - 1; x >= 0; x--) {
-  //     if (piles[x].length > 0) {
-  //       return piles[x][piles[x].length - 1];
-  //     }
-  //   }
-  //   return null;
-  // }
+  isValidMove(a: Card, b: Card, isFoundation: boolean): boolean {
+    if (!a || !b) return false;
 
-  solveCard(slots: GameSlots, card?: Card | null): GameMoved {
-    if (!card) return { ...slots, moved: false };
+    if (isFoundation) return a.number + 1 === b.number && a.type === b.type;
 
-    console.log(1);
-    let result = this.addCardToFoundations(slots, card);
-    if (result.moved) return result;
-
-    console.log(2);
-    result = this.addCardToPiles(slots, card);
-    if (result.moved) return result;
-
-    console.log(3);
-    return { ...slots, moved: false };
-  }
-
-  addCardToFoundations(slots: GameSlots, card: Card): GameMoved {
-    const result = this.addFirstToFoundation(slots, card);
-    if (result.moved) return result;
-
-    const foundationsLength = slots.foundations.length;
-    for (let x = 0; x < foundationsLength; x++) {
-      const result = this.addToPile(slots.foundations[x], card, true);
-      if (result.moved) {
-        slots.foundations[x] = [...result.pile];
-        return { ...slots, moved: true };
-      }
-    }
-    return { ...slots, moved: false };
-  }
-
-  addFirstToFoundation(slots: GameSlots, card: Card): GameMoved {
-    if (card.number === 1) {
-      const foundationsLength = slots.foundations.length;
-      for (let x = 0; x < foundationsLength; x++) {
-        if (slots.foundations[x].length === 0) {
-          slots.foundations[x] = [card];
-          return { ...slots, moved: true };
-        }
-      }
-    }
-    return { ...slots, moved: false };
-  }
-
-  addLastToPiles(slots: GameSlots, card: Card): GameMoved {
-    if (card.number === DECK_SIZE) {
-      const pilesLength = slots.piles.length;
-      for (let x = 0; x < pilesLength; x++) {
-        if (slots.piles[x].length === 0 && slots.solvedPiles[x].length === 0) {
-          slots.solvedPiles[x] = [card];
-          return { ...slots, moved: true };
-        }
-      }
-    }
-    return { ...slots, moved: false };
-  }
-
-  addCardToPiles(slots: GameSlots, card: Card): GameMoved {
-    const result = this.addLastToPiles(slots, card);
-    if (result.moved) return result;
-
-    // solve in random order
-    const length = slots.solvedPiles.length;
-    const indexes = this.shuffle(this.consecutiveArray(0, length - 1));
-
-    console.log({ indexes });
-
-    for (let x = 0; x < length; x++) {
-      const index = indexes[x];
-      const result = this.addToPile(slots.solvedPiles[index], card, false);
-      if (result.moved) {
-        slots.solvedPiles[index] = [...result.pile];
-        return { ...slots, moved: true };
-      }
-    }
-    return { ...slots, moved: false };
-  }
-
-  addToPile(pile: Card[], card: Card, foundation: boolean): { pile: Card[], card: Card, moved: boolean } {
-    if (pile.length > 0 && this.isConsecutive(pile[pile.length - 1], card, foundation)) {
-      pile.push(card);
-      return { pile, card, moved: true };
-    }
-    return { pile, card, moved: false };
-  }
-
-  isConsecutive(a: Card, b: Card, foundation: boolean): boolean {
-    if (foundation) {
-      return a.number + 1 === b.number && a.type === b.type;
-    }
     return a.number - 1 === b.number && a.color !== b.color;
   }
 
-  solveGame(game: GameSlots, prop: GameTakeableStock, index: number = 0, card: number | null = null): GameMoved {
-    const lastCard = this.getLastCard(game, prop, index);
-
-    if (!lastCard) return { ...game, moved: false };
-
-    if (prop === 'stock') {
-      const card = game.stock.pop();
-      if (card) {
-        game.activeStock.push(card);
-        game.stock = [...game.stock];
-        game.activeStock = [...game.activeStock];
-      }
-      return { ...game, moved: true };
+  solveStock(_game: GameSlots): GameSlots {
+    const game = JSON.parse(JSON.stringify(_game));
+    if (game.stock.length > 0) {
+      game.activeStock.push(game.stock.pop()!);
+      game.activeStock = [...game.activeStock];
+      game.stock = [...game.stock];
     } else {
-      const result = this.solveCard(game, lastCard);
-      if (!result.moved) return result;
-    }
-
-    return { ...this.removeLastCardFromPile(game, prop, index), moved: true };
-  }
-
-  removeLastCardFromPile(game: GameSlots, prop: GameTakeableStock, index: number): GameSlots {
-    switch (prop) {
-      case 'activeStock':
-        game.activeStock.pop();
-        game.activeStock = [...game.activeStock];
-        break;
-      case 'foundations':
-      case 'solvedPiles':
-        game[prop][index].pop();
-        game[prop][index] = [...game[prop][index]];
-
-        // auto move from pile to solve pile
-        if (prop === 'solvedPiles' && game.piles[index].length > 0) {
-          const card = game.piles[index].pop();
-          if (card) {
-            game.solvedPiles[index].push(card!);
-            game.solvedPiles[index] = [...game.solvedPiles[index]];
-            game.piles[index] = [...game.piles[index]];
-          }
-        }
-        break;
+      game.stock = [...game.activeStock];
+      game.activeStock = [];
     }
     return game;
   }
 
-  getLastCard(game: GameSlots, prop: GameTakeableStock, index: number): Card | null | undefined {
-    switch (prop) {
-      case 'stock':
-      case 'activeStock':
-        return game[prop][game[prop].length - 1];
+  solve(game: GameSlots, from: SolveFrom, to: SolveTo | null = null): GameMoved {
+    const spliced = this.spliceCards(game, from);
+    if (spliced.cards.length === 0) return { ...game, moved: false };
+
+    if (to !== null) {
+      if (!this.isDropValid(game, spliced.cards[0], to)) return { ...game, moved: false };
+    } else {
+      to = this.getDroppableStock(game, spliced.cards[0]);
+    }
+
+    if (to === null) return { ...game, moved: false };
+
+    return { ...this.makeMove(game, from, spliced, to), moved: true };
+  }
+
+  makeMove(game: GameSlots, from: SolveFrom, spliced: SpliceCards, to: SolveTo): GameSlots {
+    game[from.prop] = spliced.game[from.prop] as Card[] & Card[][];
+    game[to.prop][to.index] = game[to.prop][to.index].concat(spliced.cards);
+
+    if (from.prop === 'solvedPiles' && game.solvedPiles[from.pileIndex].length === 0 &&
+      game.piles[from.pileIndex].length > 0) {
+      // auto fold pile
+      const card = game.piles[from.pileIndex].pop();
+      game.solvedPiles[from.pileIndex].push(card!);
+      game.solvedPiles = [...game.solvedPiles];
+      game.piles = [...game.piles];
+    }
+
+    return game;
+  }
+
+  isDropValid(game: GameSlots, card: Card, to: SolveTo): boolean {
+    switch (to.prop) {
       case 'foundations':
+        return this.isDropValidFoundation(game, card, to);
       case 'solvedPiles':
-        return game[prop][index][game[prop][index].length - 1];
-      default:
-        return null;
+        return this.isDropValidSolvedPiles(game, card, to);
     }
   }
 
-  // isConsecutiveFoundation(a: Card, b: Card): boolean {
-  //   return a.number + 1 === b.number && a.type === b.type;
-  // }
+  isDropValidFoundation(game: GameSlots, card: Card, to: SolveTo): boolean {
+    const pile = game.foundations[to.index];
+    if (!Array.isArray(pile)) return false;
 
-  // isConsecutivePile(a: Card, b: Card): boolean {
-  //   return a.number - 1 === b.number && a.color !== b.color;
-  // }
+    if (pile.length === 0 && card.number === 1) return true;
+
+    return this.isValidMove(pile[pile.length - 1], card, true);
+  }
+
+  isDropValidSolvedPiles(game: GameSlots, card: Card, to: SolveTo): boolean {
+    const pile = game.solvedPiles[to.index];
+    if (!Array.isArray(pile)) return false;
+
+    if (pile.length === 0 && game.piles[to.index].length === 0 && card.number === 13) return true;
+
+    return this.isValidMove(pile[pile.length - 1], card, false);
+  }
+
+  getDroppableStock(game: GameSlots, card: Card): SolveTo | null {
+    let index = this.getDroppableFoundation(game, card);
+    if (index > -1) return { prop: 'foundations', index };
+
+    index = this.getDroppableSolvedPile(game, card);
+    if (index > -1) return { prop: 'solvedPiles', index };
+
+    return null;
+  }
+
+  getDroppableSolvedPile(game: GameSlots, card: Card): number {
+    const length = game.solvedPiles.length;
+    const indexes = this.shuffle(this.consecutiveArray(0, length - 1));
+
+    for (let x = 0; x < length; x++) {
+      const pile = game.solvedPiles[indexes[x]];
+      if (pile.length === 0) {
+        if (card.number === 13 && game.piles[indexes[x]].length === 0) { // empty slot and kayser
+          return indexes[x];
+        }
+      } else if (this.isValidMove(pile[pile.length - 1], card, false)) {
+        return indexes[x];
+      }
+    }
+    return -1;
+  }
+
+  getDroppableFoundation(game: GameSlots, card: Card): number {
+    const foundationsLength = game.foundations.length;
+    for (let x = 0; x < foundationsLength; x++) {
+      if (game.foundations[x].length === 0 ? card.number === 1 :
+        this.isValidMove(game.foundations[x][game.foundations[x].length - 1], card, true)) {
+        return x;
+      }
+    }
+    return -1;
+  }
+
+  spliceCards(_game: GameSlots, from: SolveFrom): SpliceCards {
+    const game = JSON.parse(JSON.stringify(_game));
+    switch (from.prop) {
+      case 'activeStock':
+        if (game.activeStock.length > 0) {
+          const card = game.activeStock.pop();
+          game.activeStock = [...game.activeStock];
+          return { game, cards: [card!] };
+        }
+        return { game, cards: [] };
+      case 'foundations':
+      case 'solvedPiles':
+        const pile = game[from.prop][from.pileIndex];
+        const pileLength = pile.length;
+        if (pileLength > 0) {
+          if (from.prop === 'foundations') {
+            const card = game.foundations[from.pileIndex].pop();
+            game.foundations[from.pileIndex] = [...game.foundations[from.pileIndex]];
+            return { game, cards: [card!] };
+          }
+          const cardIndex = typeof from.cardIndex !== 'undefined' && from.cardIndex > -1 ? from.cardIndex : pileLength - 1;
+          const cards = pile.splice(cardIndex);
+          game[from.prop][from.pileIndex] = [...game[from.prop][from.pileIndex]];
+          return { game, cards };
+        }
+    }
+    return { game, cards: [] };
+  }
 }

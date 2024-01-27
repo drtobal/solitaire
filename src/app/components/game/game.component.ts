@@ -76,7 +76,7 @@ export class GameComponent implements OnInit {
   }
 
   solveSection(prop: 'solvedPiles' | 'foundations', index: number): boolean {
-    const pileLength = this[prop][index].length;
+    /*const pileLength = this[prop][index].length;
     if (pileLength > 0) {
       const result = this.deckService.solveCard(this.getGameSlots(), this[prop][index][pileLength - 1]);
       if (result.moved) {
@@ -85,12 +85,12 @@ export class GameComponent implements OnInit {
         this[prop][index] = [...this[prop][index]];
         return true;
       }
-    }
+    }*/
     return false;
   }
 
   solveActiveStock(): void {
-    const stockLength = this.activeStock.length;
+    /*const stockLength = this.activeStock.length;
     if (stockLength > 0) {
       const result = this.deckService.solveCard(this.getGameSlots(), this.activeStock[stockLength - 1]);
       if (result.moved) {
@@ -98,7 +98,7 @@ export class GameComponent implements OnInit {
         this.activeStock.pop();
         this.activeStock = [...this.activeStock];
       }
-    }
+    }*/
   }
 
   getGameSlots(): GameSlots {

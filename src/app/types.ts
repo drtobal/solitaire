@@ -25,7 +25,27 @@ export type GameSlots = {
     foundations: Card[][],
 };
 
-export type GameTakeableStock = keyof Pick<GameSlots, 'activeStock' | 'solvedPiles' | 'foundations' | 'stock'>;
+export type SolveFromFoundation = {
+    prop: keyof Pick<GameSlots, 'activeStock'>;
+};
+
+export type SolveFromPile = {
+    prop: keyof Pick<GameSlots, 'solvedPiles' | 'foundations'>;
+    pileIndex: number;
+    cardIndex?: number;
+};
+
+export type SolveTo = {
+    prop: keyof Pick<GameSlots, 'solvedPiles' | 'foundations'>;
+    index: number;
+};
+
+export type SolveFrom = SolveFromFoundation | SolveFromPile;
+
+export type SpliceCards = {
+    cards: Card[];
+    game: GameSlots;
+};
 
 export interface GameMoved extends GameSlots {
     moved: boolean;
