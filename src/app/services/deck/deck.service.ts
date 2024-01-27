@@ -72,31 +72,34 @@ export class DeckService {
     return deck;
   }
 
-  getLastCardFromPiles(...piles: Card[][]): Card | null {
-    for (let x = piles.length - 1; x >= 0; x--) {
-      if (piles[x].length > 0) {
-        return piles[x][piles[x].length - 1];
-      }
-    }
-    return null;
-  }
+  // getLastCardFromPiles(...piles: Card[][]): Card | null {
+  //   for (let x = piles.length - 1; x >= 0; x--) {
+  //     if (piles[x].length > 0) {
+  //       return piles[x][piles[x].length - 1];
+  //     }
+  //   }
+  //   return null;
+  // }
 
   solveCard(slots: GameSlots, card?: Card | null): GameMoved {
     if (!card) return { ...slots, moved: false };
 
+    console.log(1);
     let result = this.addCardToFoundations(slots, card);
     if (result.moved) return result;
 
-    result = this.addCardToEmptyPiles(slots, card);
-    if (result.moved) return result;
-
+    console.log(2);
     result = this.addCardToPiles(slots, card);
     if (result.moved) return result;
 
+    console.log(3);
     return { ...slots, moved: false };
   }
 
   addCardToFoundations(slots: GameSlots, card: Card): GameMoved {
+    const result = this.addFirstToFoundation(slots, card);
+    if (result.moved) return result;
+
     const foundationsLength = slots.foundations.length;
     for (let x = 0; x < foundationsLength; x++) {
       const result = this.addToPile(slots.foundations[x], card, true);
@@ -108,8 +111,21 @@ export class DeckService {
     return { ...slots, moved: false };
   }
 
-  addCardToEmptyPiles(slots: GameSlots, card: Card): GameMoved {
-    if (card.number === DECK_SIZE) { // kaysers can be placed on empty slots
+  addFirstToFoundation(slots: GameSlots, card: Card): GameMoved {
+    if (card.number === 1) {
+      const foundationsLength = slots.foundations.length;
+      for (let x = 0; x < foundationsLength; x++) {
+        if (slots.foundations[x].length === 0) {
+          slots.foundations[x] = [card];
+          return { ...slots, moved: true };
+        }
+      }
+    }
+    return { ...slots, moved: false };
+  }
+
+  addLastToPiles(slots: GameSlots, card: Card): GameMoved {
+    if (card.number === DECK_SIZE) {
       const pilesLength = slots.piles.length;
       for (let x = 0; x < pilesLength; x++) {
         if (slots.piles[x].length === 0 && slots.solvedPiles[x].length === 0) {
@@ -122,13 +138,16 @@ export class DeckService {
   }
 
   addCardToPiles(slots: GameSlots, card: Card): GameMoved {
+    const result = this.addLastToPiles(slots, card);
+    if (result.moved) return result;
+
     // solve in random order
     const indexes = this.shuffle(this.consecutiveArray(0, slots.solvedPiles.length - 1));
     for (let x = 0; x < slots.piles.length; x++) {
       const index = indexes[x];
       const result = this.addToPile(slots.solvedPiles[index], card);
       if (result.moved) {
-        slots.solvedPiles[index] = [...slots.solvedPiles[index]];
+        slots.solvedPiles[index] = [...result.pile];
         return { ...slots, moved: true };
       }
     }
@@ -136,31 +155,22 @@ export class DeckService {
   }
 
   addToPile(pile: Card[], card: Card, sameColor: boolean = false): { pile: Card[], card: Card, moved: boolean } {
-    if (pile.length > 0) {
-      if (this.isConsecutive(pile[pile.length - 1], card, sameColor)) {
-        pile.push(card);
-        return { pile, card, moved: true };
-      }
-    } //  else if (this.isFirstCard(card, sameColor)) {
-    //   pile.push(card);
-    //   moved = true;
-    // }
+    if (pile.length > 0 && this.isConsecutive(pile[pile.length - 1], card, sameColor)) {
+      pile.push(card);
+      return { pile, card, moved: true };
+    }
     return { pile, card, moved: false };
   }
 
-  // isFirstCard(card: Card, sameColor: boolean): boolean {
-  //   return sameColor ? card.number === 1 : card.number === DECK_SIZE;
+  isConsecutive(a: Card, b: Card, sameColor: boolean = false): boolean {
+    return sameColor ? a.number + 1 === b.number && a.type === b.type : a.number - 1 === b.number && a.color !== b.color;
+  }
+
+  // isConsecutiveFoundation(a: Card, b: Card): boolean {
+  //   return a.number + 1 === b.number && a.type === b.type;
   // }
 
-  isConsecutive(a: Card, b: Card, sameColor: boolean = false): boolean {
-    return sameColor ? this.isConsecutiveFoundation(a, b) : this.isConsecutivePile(a, b);
-  }
-
-  isConsecutiveFoundation(a: Card, b: Card): boolean {
-    return a.number + 1 === b.number && a.type === b.type;
-  }
-
-  isConsecutivePile(a: Card, b: Card): boolean {
-    return a.number - 1 === b.number && a.color !== b.color;
-  }
+  // isConsecutivePile(a: Card, b: Card): boolean {
+  //   return a.number - 1 === b.number && a.color !== b.color;
+  // }
 }

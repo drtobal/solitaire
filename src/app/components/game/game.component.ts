@@ -62,9 +62,9 @@ export class GameComponent implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
-  getLastCard(...piles: Card[][]): Card | null {
-    return this.deckService.getLastCardFromPiles(...piles);
-  }
+  // getLastCard(...piles: Card[][]): Card | null {
+  //   return this.deckService.getLastCardFromPiles(...piles);
+  // }
 
   solvePile(index: number): void {
     const moved = this.solveSection('solvedPiles', index);
