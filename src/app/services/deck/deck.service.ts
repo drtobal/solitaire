@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots } from '../../types';
+import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots, GameTakeableStock } from '../../types';
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
@@ -142,8 +142,12 @@ export class DeckService {
     if (result.moved) return result;
 
     // solve in random order
-    const indexes = this.shuffle(this.consecutiveArray(0, slots.solvedPiles.length - 1));
-    for (let x = 0; x < slots.piles.length; x++) {
+    const length = slots.solvedPiles.length;
+    const indexes = this.shuffle(this.consecutiveArray(0, length - 1));
+
+    console.log({ indexes });
+
+    for (let x = 0; x < length; x++) {
       const index = indexes[x];
       const result = this.addToPile(slots.solvedPiles[index], card, false);
       if (result.moved) {
@@ -163,12 +167,69 @@ export class DeckService {
   }
 
   isConsecutive(a: Card, b: Card, foundation: boolean): boolean {
-    if (a.number + 1 === b.number) {
-      return foundation ? a.type === b.type : a.color !== b.color;
+    if (foundation) {
+      return a.number + 1 === b.number && a.type === b.type;
     }
-    return false;
+    return a.number - 1 === b.number && a.color !== b.color;
+  }
 
-    // return sameColor ? a.number + 1 === b.number && a.type === b.type : a.number - 1 === b.number && a.color !== b.color;
+  solveGame(game: GameSlots, prop: GameTakeableStock, index: number = 0, card: number | null = null): GameMoved {
+    const lastCard = this.getLastCard(game, prop, index);
+
+    if (!lastCard) return { ...game, moved: false };
+
+    if (prop === 'stock') {
+      const card = game.stock.pop();
+      if (card) {
+        game.activeStock.push(card);
+        game.stock = [...game.stock];
+        game.activeStock = [...game.activeStock];
+      }
+      return { ...game, moved: true };
+    } else {
+      const result = this.solveCard(game, lastCard);
+      if (!result.moved) return result;
+    }
+
+    return { ...this.removeLastCardFromPile(game, prop, index), moved: true };
+  }
+
+  removeLastCardFromPile(game: GameSlots, prop: GameTakeableStock, index: number): GameSlots {
+    switch (prop) {
+      case 'activeStock':
+        game.activeStock.pop();
+        game.activeStock = [...game.activeStock];
+        break;
+      case 'foundations':
+      case 'solvedPiles':
+        game[prop][index].pop();
+        game[prop][index] = [...game[prop][index]];
+
+        // auto move from pile to solve pile
+        if (prop === 'solvedPiles' && game.piles[index].length > 0) {
+          const card = game.piles[index].pop();
+          if (card) {
+            game.solvedPiles[index].push(card!);
+            game.solvedPiles[index] = [...game.solvedPiles[index]];
+            game.piles[index] = [...game.piles[index]];
+          }
+        }
+        break;
+    }
+    return game;
+  }
+
+  getLastCard(game: GameSlots, prop: GameTakeableStock, index: number): Card | null | undefined {
+    switch (prop) {
+      case 'stock':
+      case 'activeStock':
+        return game[prop][game[prop].length - 1];
+      case 'foundations':
+      case 'solvedPiles':
+        return game[prop][index][game[prop][index].length - 1];
+      default:
+        return null;
+    }
   }
 
   // isConsecutiveFoundation(a: Card, b: Card): boolean {

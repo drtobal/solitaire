@@ -25,6 +25,8 @@ export type GameSlots = {
     foundations: Card[][],
 };
 
+export type GameTakeableStock = keyof Pick<GameSlots, 'activeStock' | 'solvedPiles' | 'foundations' | 'stock'>;
+
 export interface GameMoved extends GameSlots {
     moved: boolean;
 }
