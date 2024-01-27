@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Card, CardColor, CardNumber, CardType, GameMoved, GameSlots } from '../../types';
+import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots } from '../../types';
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
@@ -26,7 +26,7 @@ export class DeckService {
   }
 
   generateGame(): GameSlots {
-    const pilesResult = this.generatePiles(this.generateDecks());
+    const pilesResult = this.generatePiles(this.generateDecks(DECKS));
     const gameSlots = {
       stock: pilesResult.mod,
       activeStock: [],
@@ -38,8 +38,8 @@ export class DeckService {
   }
 
   generatePiles(cards: Card[], length: number = PILES): { piles: Card[][], solvedPiles: Card[][], mod: Card[] } {
-    const piles = this.fillArray<Card>([], PILES);
-    const solvedPiles = this.fillArray<Card>([], PILES);
+    const piles = this.fillArray<Card>([], length);
+    const solvedPiles = this.fillArray<Card>([], length);
     for (let x = 0; x < length; x++) {
       solvedPiles[x].push(cards.shift()!);
       piles[x] = cards.splice(0, x);
@@ -55,18 +55,18 @@ export class DeckService {
     return arr;
   }
 
-  generateDecks(): Card[] {
+  generateDecks(definitions: DeckDefinition[], size: number = DECK_SIZE): Card[] {
     let decks: Card[] = [];
-    const decksLength = DECKS.length;
+    const decksLength = definitions.length;
     for (let x = 0; x < decksLength; x++) {
-      decks = decks.concat(this.generateDeck(DECKS[x].type, DECKS[x].color));
+      decks = decks.concat(this.generateDeck(definitions[x].type, definitions[x].color, size));
     }
     return decks;
   }
 
-  generateDeck(type: CardType, color: CardColor): Card[] {
+  generateDeck(type: CardType, color: CardColor, size: number = DECK_SIZE): Card[] {
     const deck: Card[] = [];
-    for (let number = 1; number <= DECK_SIZE; number++) {
+    for (let number = 1; number <= size; number++) {
       deck.push({ number: number as CardNumber, color, type });
     }
     return deck;
@@ -145,7 +145,7 @@ export class DeckService {
     const indexes = this.shuffle(this.consecutiveArray(0, slots.solvedPiles.length - 1));
     for (let x = 0; x < slots.piles.length; x++) {
       const index = indexes[x];
-      const result = this.addToPile(slots.solvedPiles[index], card);
+      const result = this.addToPile(slots.solvedPiles[index], card, false);
       if (result.moved) {
         slots.solvedPiles[index] = [...result.pile];
         return { ...slots, moved: true };
@@ -154,16 +154,21 @@ export class DeckService {
     return { ...slots, moved: false };
   }
 
-  addToPile(pile: Card[], card: Card, sameColor: boolean = false): { pile: Card[], card: Card, moved: boolean } {
-    if (pile.length > 0 && this.isConsecutive(pile[pile.length - 1], card, sameColor)) {
+  addToPile(pile: Card[], card: Card, foundation: boolean): { pile: Card[], card: Card, moved: boolean } {
+    if (pile.length > 0 && this.isConsecutive(pile[pile.length - 1], card, foundation)) {
       pile.push(card);
       return { pile, card, moved: true };
     }
     return { pile, card, moved: false };
   }
 
-  isConsecutive(a: Card, b: Card, sameColor: boolean = false): boolean {
-    return sameColor ? a.number + 1 === b.number && a.type === b.type : a.number - 1 === b.number && a.color !== b.color;
+  isConsecutive(a: Card, b: Card, foundation: boolean): boolean {
+    if (a.number + 1 === b.number) {
+      return foundation ? a.type === b.type : a.color !== b.color;
+    }
+    return false;
+
+    // return sameColor ? a.number + 1 === b.number && a.type === b.type : a.number - 1 === b.number && a.color !== b.color;
   }
 
   // isConsecutiveFoundation(a: Card, b: Card): boolean {
