@@ -6,6 +6,25 @@ import { CardColorL, CardTypeL, DECKS, DECK_SIZE, PILES } from '../../constants'
   providedIn: 'root'
 })
 export class DeckService {
+  /** suffle the array - modern version of the Fisher–Yates shuffle */
+  shuffle<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      let temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+    return array;
+  }
+
+  consecutiveArray(from: number, to: number): number[] {
+    const result: number[] = [];
+    for (let x = from; x <= to; x++) {
+      result.push(x);
+    }
+    return result;
+  }
+
   generateGame(): GameSlots {
     let cards = this.generateDecks();
     const pilesResult = this.generatePiles(cards);
@@ -79,6 +98,9 @@ export class DeckService {
     let result = this.addCardToFoundations(slots, card);
     if (result.moved) return result;
 
+    result = this.addCardToEmptyPiles(slots, card);
+    if (result.moved) return result;
+
     result = this.addCardToPiles(slots, card);
     if (result.moved) return result;
 
@@ -97,7 +119,30 @@ export class DeckService {
     return { ...slots, moved: false };
   }
 
+  addCardToEmptyPiles(slots: GameSlots, card: Card): GameMoved {
+    if (card.number === 13) { // kaysers can be placed on empty slots
+      const pilesLength = slots.piles.length;
+      for (let x = 0; x < pilesLength; x++) {
+        if (slots.piles[x].length === 0 && slots.solvedPiles[x].length === 0) {
+          slots.solvedPiles[x] = [card];
+          return { ...slots, moved: true };
+        }
+      }
+    }
+    return { ...slots, moved: false };
+  }
+
   addCardToPiles(slots: GameSlots, card: Card): GameMoved {
+    // solve in random order
+    const indexes = this.shuffle(this.consecutiveArray(0, slots.solvedPiles.length - 1));
+    for (let x = 0; x < slots.piles.length; x++) {
+      const index = indexes[x];
+      const result = this.addToPile(slots.solvedPiles[index], card);
+      if (result.moved) {
+        slots.solvedPiles[index] = [...slots.solvedPiles[index]];
+        return { ...slots, moved: true };
+      }
+    }
     return { ...slots, moved: false };
   }
 
