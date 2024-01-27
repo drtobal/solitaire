@@ -1,10 +1,10 @@
 @if (cards.length > 0) {
 @if (stacked) {
-<app-card [card]="getLastCard()" [visible]="visible"></app-card>
+<app-card (click)="clickCard.emit(cards.length -1)" [card]="getLastCard()" [visible]="visible"></app-card>
 } @else {
 @for (card of cards; track index;let index = $index) {
 <div class="stacked" [ngStyle]="getCardStyle(index)">
-    <app-card [card]="card" [visible]="visible"></app-card>
+    <app-card (click)="clickCard.emit(index)" [card]="card" [visible]="visible"></app-card>
 </div>
 }
 }

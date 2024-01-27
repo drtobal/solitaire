@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card, GameSlots } from '../../types';
+import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { CARD_SPACE } from '../../constants';
@@ -41,64 +41,28 @@ export class GameComponent implements OnInit {
     }
   }
 
-  getSolvedPileStyle(offset: number): AnyObject {
-    return { top: `${offset * CARD_SPACE}rem` };
-  }
-
-  takeStock(): void {
-    if (this.stock.length > 0) {
-      const card = this.stock.shift();
-      if (card) {
-        this.activeStock.push(card);
-      }
-
-      this.stock = [...this.stock];
-      this.activeStock = [...this.activeStock];
-    } else {
-      this.stock = [...this.activeStock];
-      this.activeStock = [];
-    }
-
+  moveSolvedPile(pileIndex: number, cardIndex: number): void {
+    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'solvedPiles', pileIndex, cardIndex }));
     this.changeDetectorRef.detectChanges();
   }
 
-  // getLastCard(...piles: Card[][]): Card | null {
-  //   return this.deckService.getLastCardFromPiles(...piles);
-  // }
-
-  solvePile(index: number): void {
-    const moved = this.solveSection('solvedPiles', index);
-    if (!moved && this.piles[index].length > 0) { // move the card on same pile to the solved
-      this.solvedPiles[index].push(this.piles[index].pop()!);
-      this.solvedPiles[index] = [...this.solvedPiles[index]];
-      this.piles[index] = [...this.piles[index]];
-    }
-  }
-
-  solveSection(prop: 'solvedPiles' | 'foundations', index: number): boolean {
-    /*const pileLength = this[prop][index].length;
-    if (pileLength > 0) {
-      const result = this.deckService.solveCard(this.getGameSlots(), this[prop][index][pileLength - 1]);
-      if (result.moved) {
-        this.setGameSlots(result);
-        this[prop][index].pop();
-        this[prop][index] = [...this[prop][index]];
-        return true;
-      }
-    }*/
-    return false;
+  solveStock(): void {
+    this.setGameSlots(this.deckService.solveStock(this.getGameSlots()));
+    this.changeDetectorRef.detectChanges();
   }
 
   solveActiveStock(): void {
-    /*const stockLength = this.activeStock.length;
-    if (stockLength > 0) {
-      const result = this.deckService.solveCard(this.getGameSlots(), this.activeStock[stockLength - 1]);
-      if (result.moved) {
-        this.setGameSlots(result);
-        this.activeStock.pop();
-        this.activeStock = [...this.activeStock];
-      }
-    }*/
+    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'activeStock' }));
+    this.changeDetectorRef.detectChanges();
+  }
+
+  solveFoundation(pileIndex: number): void {
+    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'foundations', pileIndex }));
+    this.changeDetectorRef.detectChanges();
+  }
+
+  getSolvedPileStyle(offset: number): AnyObject {
+    return { top: `${offset * CARD_SPACE}rem` };
   }
 
   getGameSlots(): GameSlots {

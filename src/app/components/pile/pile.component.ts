@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CARD_SPACE } from '../../constants';
 import { AnyObject, Card } from '../../types';
 import { CardComponent } from '../card/card.component';
@@ -20,6 +20,8 @@ export class PileComponent {
   @Input() visible: boolean = false;
 
   @Input() gap: number = 0;
+
+  @Output() clickCard = new EventEmitter<number>();
 
   getLastCard(): Card {
     return this.cards[this.cards.length - 1];

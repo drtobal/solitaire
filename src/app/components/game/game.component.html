@@ -1,18 +1,18 @@
 <div class="top">
     @for (foundation of foundations; track index; let index = $index) {
-    <app-pile [cards]="foundation" [visible]="true" (click)="solveSection('foundations', index)"></app-pile>
+    <app-pile [cards]="foundation" [visible]="true" (click)="solveFoundation(index)"></app-pile>
     }
     <div class="separator"></div>
     <app-pile [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"></app-pile>
-    <app-pile [cards]="stock" [visible]="false" (click)="takeStock()"></app-pile>
+    <app-pile [cards]="stock" [visible]="false" (click)="solveStock()"></app-pile>
 </div>
 
 <div class="piles">
     @for (pile of piles; track index; let index = $index) {
-    <div class="pile" (click)="solvePile(index)">
+    <div class="pile">
         <app-pile [cards]="pile" [stacked]="false"></app-pile>
         <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" [cards]="solvedPiles[index]" [stacked]="false"
-            [visible]="true" [gap]="1"></app-pile>
+            [visible]="true" [gap]="1" (clickCard)="moveSolvedPile(index, $event)"></app-pile>
     </div>
     }
 </div>
