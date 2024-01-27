@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Card, CardColor, CardNumber, CardType, GameMoved, GameSlots } from '../../types';
-import { CardColorL, CardTypeL, DECKS, DECK_SIZE, PILES } from '../../constants';
+import { DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +9,8 @@ export class DeckService {
   /** suffle the array - modern version of the Fisher–Yates shuffle */
   shuffle<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      let temp = array[i];
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = array[i];
       array[i] = array[j];
       array[j] = temp;
     }
@@ -26,34 +26,25 @@ export class DeckService {
   }
 
   generateGame(): GameSlots {
-    let cards = this.generateDecks();
-    const pilesResult = this.generatePiles(cards);
-    cards = pilesResult.mod;
+    const pilesResult = this.generatePiles(this.generateDecks());
     const gameSlots = {
-      stock: cards,
+      stock: pilesResult.mod,
       activeStock: [],
       piles: pilesResult.piles,
       solvedPiles: pilesResult.solvedPiles,
-      foundations: this.fillArray<Card>([], DECKS),
+      foundations: this.fillArray<Card>([], DECKS.length),
     };
     return gameSlots;
   }
 
   generatePiles(cards: Card[], length: number = PILES): { piles: Card[][], solvedPiles: Card[][], mod: Card[] } {
-    const result = {
-      piles: this.fillArray<Card>([], PILES),
-      solvedPiles: this.fillArray<Card>([], PILES),
-      mod: [] as Card[],
-    };
+    const piles = this.fillArray<Card>([], PILES);
+    const solvedPiles = this.fillArray<Card>([], PILES);
     for (let x = 0; x < length; x++) {
-      const first = cards.shift();
-      if (first) {
-        result.solvedPiles[x].push(first);
-      }
-      result.piles[x] = cards.splice(0, x);
+      solvedPiles[x].push(cards.shift()!);
+      piles[x] = cards.splice(0, x);
     }
-    result.mod = cards;
-    return result;
+    return { piles, solvedPiles, mod: cards };
   }
 
   fillArray<T>(arr: T[][], length: number): T[][] {
@@ -66,12 +57,10 @@ export class DeckService {
 
   generateDecks(): Card[] {
     let decks: Card[] = [];
-
-    decks = decks.concat(this.generateDeck(CardTypeL.heart, CardColorL.red));
-    decks = decks.concat(this.generateDeck(CardTypeL.diamond, CardColorL.red));
-    decks = decks.concat(this.generateDeck(CardTypeL.spade, CardColorL.black));
-    decks = decks.concat(this.generateDeck(CardTypeL.club, CardColorL.black));
-
+    const decksLength = DECKS.length;
+    for (let x = 0; x < decksLength; x++) {
+      decks = decks.concat(this.generateDeck(DECKS[x].type, DECKS[x].color));
+    }
     return decks;
   }
 
@@ -120,7 +109,7 @@ export class DeckService {
   }
 
   addCardToEmptyPiles(slots: GameSlots, card: Card): GameMoved {
-    if (card.number === 13) { // kaysers can be placed on empty slots
+    if (card.number === DECK_SIZE) { // kaysers can be placed on empty slots
       const pilesLength = slots.piles.length;
       for (let x = 0; x < pilesLength; x++) {
         if (slots.piles[x].length === 0 && slots.solvedPiles[x].length === 0) {
@@ -147,32 +136,24 @@ export class DeckService {
   }
 
   addToPile(pile: Card[], card: Card, sameColor: boolean = false): { pile: Card[], card: Card, moved: boolean } {
-    let moved: boolean = false;
     if (pile.length > 0) {
-      const lastCard = pile[pile.length - 1];
-      if (this.isConsecutive(lastCard, card, sameColor)) {
+      if (this.isConsecutive(pile[pile.length - 1], card, sameColor)) {
         pile.push(card);
-        moved = true;
+        return { pile, card, moved: true };
       }
-    } else if (this.isFirstCard(card, sameColor)) {
-      pile.push(card);
-      moved = true;
-    }
-    return { pile, card, moved };
+    } //  else if (this.isFirstCard(card, sameColor)) {
+    //   pile.push(card);
+    //   moved = true;
+    // }
+    return { pile, card, moved: false };
   }
 
-  isFirstCard(card: Card, sameColor: boolean): boolean {
-    if (sameColor) {
-      return card.number === 1;
-    }
-    return card.number === 13;
-  }
+  // isFirstCard(card: Card, sameColor: boolean): boolean {
+  //   return sameColor ? card.number === 1 : card.number === DECK_SIZE;
+  // }
 
   isConsecutive(a: Card, b: Card, sameColor: boolean = false): boolean {
-    if (sameColor) {
-      return this.isConsecutiveFoundation(a, b);
-    }
-    return this.isConsecutivePile(a, b);
+    return sameColor ? this.isConsecutiveFoundation(a, b) : this.isConsecutivePile(a, b);
   }
 
   isConsecutiveFoundation(a: Card, b: Card): boolean {

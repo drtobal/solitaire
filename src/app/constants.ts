@@ -1,6 +1,6 @@
-export const DECK_SIZE = 13;
+import { DeckDefinition } from "./types";
 
-export const DECKS = 4;
+export const DECK_SIZE = 13;
 
 export const PILES = 7;
 
@@ -17,6 +17,13 @@ export enum CardColorL {
     black = 'black',
     red = 'red',
 };
+
+export const DECKS: DeckDefinition[] = [
+    { color: CardColorL.black, type: CardTypeL.club },
+    { color: CardColorL.red, type: CardTypeL.diamond },
+    { color: CardColorL.black, type: CardTypeL.heart },
+    { color: CardColorL.red, type: CardTypeL.heart },
+];
 
 export const CARD_TYPES = [CardTypeL.club, CardTypeL.diamond, CardTypeL.heart, CardTypeL.spade];
 
