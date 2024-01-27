@@ -241,13 +241,13 @@ describe('DeckService', () => {
       [],
       [club(13)],
       [heart(4)],
-      [],
+      [spade(10)],
       [spade(13), club(9), club(12), heart(2)],
       [],
       [spade(12), club(1)],
     ];
     game.stock = [
-      heart(5),
+      diamond(9), heart(7), heart(12), heart(5),
     ];
     game.solvedPiles = [
       [diamond(10)],
@@ -343,5 +343,57 @@ describe('DeckService', () => {
     expect(game.solvedPiles[3]).toEqual([club(11), diamond(10), club(9), heart(8)]);
     expect(game.piles[4]).toEqual([]);
     expect(game.solvedPiles[4]).toEqual([spade(13)]);
+
+    snapshot = cloneGame(game);
+    game = service.solveStock(game);
+    expect(game.activeStock).toEqual([heart(5), heart(12)]);
+    expect(game.stock).not.toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.solvedPiles).toEqual(snapshot.solvedPiles);
+
+    snapshot = cloneGame(game);
+    game = service.solve(game, { prop: 'activeStock' }, { prop: 'solvedPiles', index: 1 });
+    expect(game.activeStock).toEqual([heart(5)]);
+    expect(game.stock).toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.solvedPiles).not.toEqual(snapshot.solvedPiles);
+    expect(game.solvedPiles[1]).toEqual([club(13), heart(12)]);
+
+    snapshot = cloneGame(game);
+    game = service.solve(game, { prop: 'solvedPiles', pileIndex: 3, cardIndex: 0 });
+    expect(game.activeStock).toEqual(snapshot.activeStock);
+    expect(game.stock).toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).not.toEqual(snapshot.piles);
+    expect(game.solvedPiles).not.toEqual(snapshot.solvedPiles);
+    expect(game.solvedPiles[3]).toEqual([spade(10)]);
+    expect(game.solvedPiles[1]).toEqual([club(13), heart(12), club(11), diamond(10), club(9), heart(8)]);
+
+    snapshot = cloneGame(game);
+    game = service.solveStock(game);
+    expect(game.activeStock).toEqual([heart(5), heart(7)]);
+    expect(game.stock).not.toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.solvedPiles).toEqual(snapshot.solvedPiles);
+
+    snapshot = cloneGame(game);
+    game = service.solveStock(game);
+    expect(game.activeStock).toEqual([heart(5), heart(7), diamond(9)]);
+    expect(game.stock).not.toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.solvedPiles).toEqual(snapshot.solvedPiles);
+
+    snapshot = cloneGame(game);
+    game = service.solve(game, { prop: 'activeStock' });
+    expect(game.activeStock).toEqual([heart(5), heart(7)]);
+    expect(game.stock).toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.solvedPiles).not.toEqual(snapshot.solvedPiles);
+    expect(game.solvedPiles[3]).toEqual([spade(10), diamond(9)]);
   });
 });

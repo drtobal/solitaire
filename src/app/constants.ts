@@ -21,7 +21,7 @@ export enum CardColorL {
 export const DECKS: DeckDefinition[] = [
     { color: CardColorL.black, type: CardTypeL.club },
     { color: CardColorL.red, type: CardTypeL.diamond },
-    { color: CardColorL.black, type: CardTypeL.heart },
+    { color: CardColorL.black, type: CardTypeL.spade },
     { color: CardColorL.red, type: CardTypeL.heart },
 ];
 

@@ -87,7 +87,7 @@ export class DeckService {
       game.activeStock = [...game.activeStock];
       game.stock = [...game.stock];
     } else {
-      game.stock = [...game.activeStock];
+      game.stock = game.activeStock.reverse();
       game.activeStock = [];
     }
     return game;
@@ -109,8 +109,8 @@ export class DeckService {
   }
 
   makeMove(game: GameSlots, from: SolveFrom, spliced: SpliceCards, to: SolveTo): GameSlots {
-    game[from.prop] = spliced.game[from.prop] as Card[] & Card[][];
-    game[to.prop][to.index] = game[to.prop][to.index].concat(spliced.cards);
+    game[from.prop] = [...spliced.game[from.prop] as Card[] & Card[][]];
+    game[to.prop][to.index] = [...game[to.prop][to.index].concat(spliced.cards)];
 
     if (from.prop === 'solvedPiles' && game.solvedPiles[from.pileIndex].length === 0 &&
       game.piles[from.pileIndex].length > 0) {
@@ -118,7 +118,7 @@ export class DeckService {
       const card = game.piles[from.pileIndex].pop();
       game.solvedPiles[from.pileIndex].push(card!);
       game.solvedPiles = [...game.solvedPiles];
-      game.piles = [...game.piles];
+      game.piles = JSON.parse(JSON.stringify(game.piles));
     }
 
     return game;
