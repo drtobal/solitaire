@@ -67,19 +67,26 @@ export class GameComponent implements OnInit {
   }
 
   solvePile(index: number): void {
-    const pileLength = this.solvedPiles[index].length;
-    if (pileLength > 0) {
-      const result = this.deckService.solveCard(this.getGameSlots(), this.solvedPiles[index][pileLength - 1]);
-      if (result.moved) {
-        this.setGameSlots(result);
-        this.solvedPiles[index].pop();
-        this.solvedPiles[index] = [...this.solvedPiles[index]];
-      }
-    } else if (this.piles[index].length > 0) { // move the card on pile to the solved
+    const moved = this.solveSection('solvedPiles', index);
+    if (!moved && this.piles[index].length > 0) { // move the card on same pile to the solved
       this.solvedPiles[index].push(this.piles[index].pop()!);
       this.solvedPiles[index] = [...this.solvedPiles[index]];
       this.piles[index] = [...this.piles[index]];
     }
+  }
+
+  solveSection(prop: 'solvedPiles' | 'foundations', index: number): boolean {
+    const pileLength = this[prop][index].length;
+    if (pileLength > 0) {
+      const result = this.deckService.solveCard(this.getGameSlots(), this[prop][index][pileLength - 1]);
+      if (result.moved) {
+        this.setGameSlots(result);
+        this[prop][index].pop();
+        this[prop][index] = [...this[prop][index]];
+        return true;
+      }
+    }
+    return false;
   }
 
   solveActiveStock(): void {

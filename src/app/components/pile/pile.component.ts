@@ -19,13 +19,15 @@ export class PileComponent {
 
   @Input() visible: boolean = false;
 
+  @Input() gap: number = 0;
+
   getLastCard(): Card {
     return this.cards[this.cards.length - 1];
   }
 
   getCardStyle(index: number): AnyObject {
     return {
-      top: `${CARD_SPACE * index}rem`,
+      top: `${(CARD_SPACE + this.gap) * index}rem`,
     };
   }
 }
