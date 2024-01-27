@@ -3,16 +3,16 @@
     <app-pile [cards]="foundation" [visible]="true"></app-pile>
     }
     <div class="separator"></div>
-    <app-pile [cards]="activeStock" [visible]="true"></app-pile>
+    <app-pile [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"></app-pile>
     <app-pile [cards]="stock" [visible]="false" (click)="takeStock()"></app-pile>
 </div>
 
 <div class="piles">
     @for (pile of piles; track index; let index = $index) {
-    <div class="pile">
+    <div class="pile" (click)="solvePile(index)">
         <app-pile [cards]="pile" [stacked]="false"></app-pile>
-        <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" (click)="solvePile(index)"
-            [cards]="solvedPiles[index]" [stacked]="false" [visible]="true"></app-pile>
+        <app-pile [ngStyle]="getSolvedPileStyle(pile.length)" [cards]="solvedPiles[index]" [stacked]="false"
+            [visible]="true"></app-pile>
     </div>
     }
 </div>

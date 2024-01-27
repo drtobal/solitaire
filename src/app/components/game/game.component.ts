@@ -69,22 +69,29 @@ export class GameComponent implements OnInit {
   solvePile(index: number): void {
     const pileLength = this.solvedPiles[index].length;
     if (pileLength > 0) {
-      const lastCard = this.solvedPiles[index][pileLength - 1];
-      if (lastCard) {
-        const result = this.deckService.completeCard(this.getGameSlots(), lastCard);
-        if (result.moved) {
-          this.setGameSlots(result);
-          this.solvedPiles[index].pop();
-          this.solvedPiles[index] = [...this.solvedPiles[index]];
-        }
+      const result = this.deckService.solveCard(this.getGameSlots(), this.solvedPiles[index][pileLength - 1]);
+      if (result.moved) {
+        this.setGameSlots(result);
+        this.solvedPiles[index].pop();
+        this.solvedPiles[index] = [...this.solvedPiles[index]];
       }
+    } else if (this.piles[index].length > 0) { // move the card on pile to the solved
+      this.solvedPiles[index].push(this.piles[index].pop()!);
+      this.solvedPiles[index] = [...this.solvedPiles[index]];
+      this.piles[index] = [...this.piles[index]];
     }
   }
 
-  completeCard(card?: Card | null): void {
-    const result = this.deckService.completeCard(this.getGameSlots(), card);
-    console.log(result);
-    this.setGameSlots(result);
+  solveActiveStock(): void {
+    const stockLength = this.activeStock.length;
+    if (stockLength > 0) {
+      const result = this.deckService.solveCard(this.getGameSlots(), this.activeStock[stockLength - 1]);
+      if (result.moved) {
+        this.setGameSlots(result);
+        this.activeStock.pop();
+        this.activeStock = [...this.activeStock];
+      }
+    }
   }
 
   getGameSlots(): GameSlots {

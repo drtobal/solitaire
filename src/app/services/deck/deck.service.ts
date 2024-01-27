@@ -73,7 +73,7 @@ export class DeckService {
     return null;
   }
 
-  completeCard(slots: GameSlots, card?: Card | null): GameMoved {
+  solveCard(slots: GameSlots, card?: Card | null): GameMoved {
     if (!card) return { ...slots, moved: false };
 
     let result = this.addCardToFoundations(slots, card);
