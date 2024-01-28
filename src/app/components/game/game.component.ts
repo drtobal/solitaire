@@ -1,9 +1,11 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
+import { AnyObject, Card, GameSlots } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { CARD_SPACE } from '../../constants';
+import { GameService } from '../../services/game/game.service';
+import { UtilService } from '../../services/util/util.service';
 
 @Component({
   selector: 'app-game',
@@ -29,6 +31,8 @@ export class GameComponent implements OnInit {
 
   constructor(
     private deckService: DeckService,
+    private gameService: GameService,
+    private utilService: UtilService,
     private changeDetectorRef: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: string,
   ) {
@@ -59,6 +63,22 @@ export class GameComponent implements OnInit {
   solveFoundation(pileIndex: number): void {
     this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'foundations', pileIndex }));
     this.changeDetectorRef.detectChanges();
+  }
+
+  canAutoSolve(): boolean {
+    return this.gameService.hasPiles(this.getGameSlots());
+  } 
+
+  async autoSolve(): Promise<void> {
+    let game = this.getGameSlots();
+    let loop = 0;
+    const limit = 99;
+    while (++loop < limit && !this.gameService.isGameEnded(game)) {
+      await this.utilService.wait(50);
+      game = this.gameService.solveNext(game);
+      this.setGameSlots(JSON.parse(JSON.stringify(game)));
+      this.changeDetectorRef.detectChanges();
+    }
   }
 
   getSolvedPileStyle(offset: number): AnyObject {

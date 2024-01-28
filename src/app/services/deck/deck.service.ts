@@ -217,4 +217,8 @@ export class DeckService {
     }
     return { game, cards: [] };
   }
+
+  isSameCard(a?: Card, b?: Card): boolean {
+    return !!(a && b && a.color === b.color && a.number === b.number && a.type === b.type);
+  }
 }
