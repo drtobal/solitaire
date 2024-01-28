@@ -15,13 +15,13 @@ export class AnimateHelperService {
   getElementFrom(root: HTMLElement, from: SolveFrom): HTMLElement | null {
     switch (from.prop) {
       case 'activeStock':
-        return root.querySelector('app-pile.active-stock > div:first-child') ||
+        return root.querySelector('app-pile.active-stock') ||
           root.querySelector('app-pile.active-stock');
       case 'foundations':
-        return root.querySelector(`app-pile.foundation.index-${from.pileIndex} > div:last-child`) ||
+        return root.querySelector(`app-pile.foundation.index-${from.pileIndex} > div:nth-child(${from.cardIndex})`) ||
           root.querySelector(`app-pile.foundation.index-${from.pileIndex}`);
       case 'solvedPiles':
-        return root.querySelector(`app-pile.solved-pile.index-${from.pileIndex} > div:last-child`)
+        return root.querySelector(`app-pile.solved-pile.index-${from.pileIndex} > div:nth-child(${from.cardIndex})`)
           || root.querySelector(`app-pile.solved-pile.index-${from.pileIndex}`);
     }
   }
@@ -37,25 +37,23 @@ export class AnimateHelperService {
     }
   }
 
-  getCardStartStyle(element: HTMLElement, from: SolveFrom): AnyObject {
-    const styles: AnyObject = {};
-    const targetElement = this.getElementFrom(element, from);
+  getElementPositionStyles(targetElement?: HTMLElement | null): AnyObject {
     if (targetElement) {
-      const position = this.utilService.getOffset(targetElement);
-      styles['top'] = `${position.top}px`;
-      styles['left'] = `${position.left}px`;
+      const position = this.utilService.getOffset(targetElement as HTMLElement);
+      return { top: `${position.top}px`, left: `${position.left}px` };
     }
-    return styles;
+    return {};
+  }
+
+  getCardStyleCustom(element: HTMLElement, selector: string): AnyObject {
+    return this.getElementPositionStyles(element.querySelector(selector) as HTMLElement);
+  }
+
+  getCardStartStyle(element: HTMLElement, from: SolveFrom): AnyObject {
+    return this.getElementPositionStyles(this.getElementFrom(element, from));
   }
 
   getCardEndStyle(element: HTMLElement, to: SolveTo): AnyObject {
-    const styles: AnyObject = {};
-    const targetElement = this.getElementTo(element, to);
-    if (targetElement) {
-      const position = this.utilService.getOffset(targetElement);
-      styles['top'] = `${position.top + REM_PX}px`;
-      styles['left'] = `${position.left + REM_PX}px`;
-    }
-    return styles;
+    return this.getElementPositionStyles(this.getElementTo(element, to));
   }
 }

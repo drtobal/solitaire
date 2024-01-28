@@ -59,12 +59,12 @@ export class GameComponent implements OnInit {
       this.animatingCards = solvedGame.spliced.cards;
       this.animatingStyle = this.animateHelperService.getCardStartStyle(this.elementRef.nativeElement, from);
       this.changeDetectorRef.detectChanges();
-
       await this.utilService.wait(10);
+
       this.animatingStyle = this.animateHelperService.getCardEndStyle(this.elementRef.nativeElement, solvedGame.to);
       this.changeDetectorRef.detectChanges();
-
       await this.utilService.wait(100);
+
       this.animatingCards = [];
     }
     this.setGameSlots(solvedGame);
@@ -83,8 +83,25 @@ export class GameComponent implements OnInit {
     this.solveWithAnimation({ prop: 'foundations', pileIndex });
   }
 
-  solveStock(): void {
-    this.setGameSlots(this.deckService.solveStock(this.getGameSlots()));
+  async solveStock(): Promise<void> {
+    const game = this.deckService.solveStock(this.getGameSlots());
+    if (this.stock.length > 0) {
+      this.animatingCards = this.stock.slice(-1);
+      if (this.stock.length === 1) {
+        this.stock = [];
+      } 
+
+      this.animatingStyle = this.animateHelperService.getCardStyleCustom(this.elementRef.nativeElement, 'app-pile.stock');
+      this.changeDetectorRef.detectChanges();
+      await this.utilService.wait(10);
+
+      this.animatingStyle = this.animateHelperService.getCardStyleCustom(this.elementRef.nativeElement, 'app-pile.active-stock');
+      this.changeDetectorRef.detectChanges();
+      await this.utilService.wait(100);
+
+      this.animatingCards = [];
+    }
+    this.setGameSlots(game);
     this.changeDetectorRef.detectChanges();
   }
 

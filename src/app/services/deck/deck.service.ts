@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Card, CardColor, CardNumber, CardType, DeckDefinition, FullCameMoved, GameMoved, GameSlots, SolveFrom, SolveTo, SpliceCards } from '../../types';
+import { Card, CardColor, CardNumber, CardType, DeckDefinition, FullCameMoved, GameSlots, SolveFrom, SolveTo, SpliceCards } from '../../types';
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
+import { UtilService } from '../util/util.service';
 
 @Injectable({
   providedIn: 'root'
@@ -81,7 +82,7 @@ export class DeckService {
   }
 
   solveStock(_game: GameSlots): GameSlots {
-    const game = JSON.parse(JSON.stringify(_game));
+    const game = UtilService.deepClone(_game);
     if (game.stock.length > 0) {
       game.activeStock.push(game.stock.pop()!);
       game.activeStock = [...game.activeStock];
@@ -96,11 +97,12 @@ export class DeckService {
   solve(game: GameSlots, from: SolveFrom, to: SolveTo | null = null): FullCameMoved {
     const spliced = this.spliceCards(game, from);
     if (spliced.cards.length === 0) return { ...game, spliced, moved: false };
-
     if (to !== null) {
       if (!this.isDropValid(game, spliced.cards[0], to)) return { ...game, spliced, moved: false };
     } else {
-      to = this.getDroppableStock(game, spliced.cards[0]);
+
+      console.log('getDroppableStock', !(spliced.cards.length > 1));
+      to = this.getDroppableStock(game, spliced.cards[0], spliced.cards.length > 1);
     }
 
     if (to === null) return { ...game, spliced, moved: false };
@@ -118,7 +120,7 @@ export class DeckService {
       const card = game.piles[from.pileIndex].pop();
       game.solvedPiles[from.pileIndex].push(card!);
       game.solvedPiles = [...game.solvedPiles];
-      game.piles = JSON.parse(JSON.stringify(game.piles));
+      game.piles = UtilService.deepClone(game.piles);
     }
 
     return game;
@@ -151,9 +153,12 @@ export class DeckService {
     return this.isValidMove(pile[pile.length - 1], card, false);
   }
 
-  getDroppableStock(game: GameSlots, card: Card): SolveTo | null {
-    let index = this.getDroppableFoundation(game, card);
-    if (index > -1) return { prop: 'foundations', index };
+  getDroppableStock(game: GameSlots, card: Card, skipFoundation: boolean): SolveTo | null {
+    let index = -1;
+    if (!skipFoundation) {
+      index = this.getDroppableFoundation(game, card);
+      if (index > -1) return { prop: 'foundations', index };
+    }
 
     index = this.getDroppableSolvedPile(game, card);
     if (index > -1) return { prop: 'solvedPiles', index };
@@ -190,7 +195,7 @@ export class DeckService {
   }
 
   spliceCards(_game: GameSlots, from: SolveFrom): SpliceCards {
-    const game = JSON.parse(JSON.stringify(_game));
+    const game = UtilService.deepClone(_game);
     switch (from.prop) {
       case 'activeStock':
         if (game.activeStock.length > 0) {
