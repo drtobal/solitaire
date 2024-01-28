@@ -100,8 +100,6 @@ export class DeckService {
     if (to !== null) {
       if (!this.isDropValid(game, spliced.cards[0], to)) return { ...game, spliced, moved: false };
     } else {
-
-      console.log('getDroppableStock', !(spliced.cards.length > 1));
       to = this.getDroppableStock(game, spliced.cards[0], spliced.cards.length > 1);
     }
 

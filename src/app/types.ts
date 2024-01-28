@@ -25,7 +25,7 @@ export type GameSlots = {
     foundations: Card[][],
 };
 
-export type SolveFromFoundation = {
+export type SolveFromStock = {
     prop: keyof Pick<GameSlots, 'activeStock'>;
 };
 
@@ -40,7 +40,7 @@ export type SolveTo = {
     index: number;
 };
 
-export type SolveFrom = SolveFromFoundation | SolveFromPile;
+export type SolveFrom = SolveFromStock | SolveFromPile;
 
 export type SpliceCards = {
     cards: Card[];

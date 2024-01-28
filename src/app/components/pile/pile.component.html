@@ -1,11 +1,36 @@
-@if (cards.length > 0) {
-@if (stacked) {
-<app-card (click)="clickCard.emit(cards.length -1)" [card]="getLastCard()" [visible]="visible"></app-card>
-} @else {
-@for (card of cards; track index;let index = $index) {
-<div class="stacked" [ngStyle]="getCardStyle(index)">
-    <app-card (click)="clickCard.emit(index)" [card]="card" [visible]="visible"></app-card>
+<div cdkDropList class="list" connectedTo="drop">
+    @if (cards.length > 0) {
+    @if (stacked) {
+    <app-card cdkDrag (cdkDragStarted)="cdkDragStarted(cards.length -1)" (click)="clickCard.emit(cards.length -1)"
+        [card]="getLastCard()" [visible]="visible"></app-card>
+    } @else {
+    @for (card of cards; track x;let x = $index) {
+    @if (dragIndex === -1 || x <= dragIndex) { <div class="drag card-container" cdkDrag [ngClass]="{visible: visible}"
+        (cdkDragStarted)="cdkDragStarted(x)" (cdkDragEnded)="cdkDragEnded()">
+        <app-card (click)="clickCard.emit(x)" [card]="card" [visible]="visible"></app-card>
+
+        <div *cdkDragPreview>
+            <div class="preview-container">
+                @for (preview of cards.slice(x); track y; let y = $index) {
+                <div class="card-container visible">
+                    <app-card [card]="preview" [visible]="true"></app-card>
+                </div>
+                }
+            </div>
+        </div>
 </div>
 }
 }
+}
+} @else {
+@if (placeholder) {
+<div class="placeholder-container">
+    <div class="placeholder"></div>
+</div>
+}
+}
+</div>
+
+@if (hasDrop) {
+<div cdkDropList connectedTo="drop" class="drop-list" (cdkDropListDropped)="cdkDropListDropped($event)"></div>
 }

@@ -34,6 +34,8 @@ export class GameComponent implements OnInit {
 
   animatingStyle: AnyObject = {};
 
+  dragFrom: SolveFrom | null = null;
+
   constructor(
     private deckService: DeckService,
     private gameService: GameService,
@@ -89,7 +91,7 @@ export class GameComponent implements OnInit {
       this.animatingCards = this.stock.slice(-1);
       if (this.stock.length === 1) {
         this.stock = [];
-      } 
+      }
 
       this.animatingStyle = this.animateHelperService.getCardStyleCustom(this.elementRef.nativeElement, 'app-pile.stock');
       this.changeDetectorRef.detectChanges();
@@ -109,6 +111,20 @@ export class GameComponent implements OnInit {
     return this.gameService.hasPiles(this.getGameSlots());
   }
 
+  dragStarted(data: SolveFrom): void {
+    this.dragFrom = data;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  cdkDropListDropped(event: any): void {
+    console.log(event);
+  }
+
+  dragEnded(): void {
+    this.dragFrom = null;
+    this.changeDetectorRef.detectChanges();
+  }
+
   async autoSolve(): Promise<void> {
     /*let game = this.getGameSlots();
     let loop = 0;
@@ -119,10 +135,6 @@ export class GameComponent implements OnInit {
       this.setGameSlots(JSON.parse(JSON.stringify(game)));
       this.changeDetectorRef.detectChanges();
     }*/
-  }
-
-  getSolvedPileStyle(offset: number): AnyObject {
-    return { top: `${offset * CARD_SPACE}rem` };
   }
 
   getGameSlots(): GameSlots {

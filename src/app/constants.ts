@@ -4,7 +4,7 @@ export const DECK_SIZE = 13;
 
 export const PILES = 7;
 
-export const CARD_SPACE = 0.25;
+export const CARD_SPACE = 1;
 
 export const REM_PX = 16;
 

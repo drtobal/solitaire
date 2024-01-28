@@ -37,10 +37,10 @@ export class AnimateHelperService {
     }
   }
 
-  getElementPositionStyles(targetElement?: HTMLElement | null): AnyObject {
+  getElementPositionStyles(targetElement?: HTMLElement | null, gap: number = 0): AnyObject {
     if (targetElement) {
       const position = this.utilService.getOffset(targetElement as HTMLElement);
-      return { top: `${position.top}px`, left: `${position.left}px` };
+      return { top: `${position.top + gap}px`, left: `${position.left}px` };
     }
     return {};
   }
@@ -54,6 +54,6 @@ export class AnimateHelperService {
   }
 
   getCardEndStyle(element: HTMLElement, to: SolveTo): AnyObject {
-    return this.getElementPositionStyles(this.getElementTo(element, to));
+    return this.getElementPositionStyles(this.getElementTo(element, to), 1.25 * REM_PX);
   }
 }

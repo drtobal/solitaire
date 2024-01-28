@@ -10,10 +10,6 @@
     gap: 1rem;
 }
 
-.bottom {
-    background-color: whitesmoke;
-}
-
 .piles {
     justify-content: space-between;
     min-height: 15rem;
@@ -35,4 +31,8 @@ app-pile {
     position: fixed;
     display: block;
     transition: all 90ms linear;
+}
+
+.pile-container {
+    position: relative;
 }

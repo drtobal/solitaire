@@ -1,11 +1,56 @@
 :host {
     position: relative;
-    min-height: var(--card-height);
-    width: var(--card-width);
-    border-radius: 0.5rem;
 }
 
-.stacked {
+.preview-container,
+.card-container {
+    position: relative;
+}
+
+.card-container {
+    height: 0.5rem;
+
+    &.visible {
+        height: 1.25rem;
+    }
+}
+
+.drop-list {
     position: absolute;
+    top: 0;
     left: 0;
+    min-height: var(--card-height);
+    height: calc(var(--card-height) * 2);
+    width: var(--card-width);
+}
+
+.placeholder-container {
+    height: 0;
+    position: relative;
+    width: var(--card-width);
+}
+
+.placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--card-width);
+    height: var(--card-height);
+    border-radius: 0.5rem;
+    background-color: whitesmoke;
+    border: 2px solid whitesmoke;
+}
+
+::ng-deep {
+    .cdk-drag-placeholder {
+        opacity: 0;
+    }
+
+    .cdk-drag-animating {
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .list.cdk-drop-list-dragging .drag:not(.cdk-drag-placeholder) {
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
 }
