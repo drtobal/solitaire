@@ -50,3 +50,13 @@ export type SpliceCards = {
 export interface GameMoved extends GameSlots {
     moved: boolean;
 }
+
+export interface FullCameMoved extends GameMoved {
+    spliced: SpliceCards;
+    to?: SolveTo;
+}
+
+export type Coords2D = {
+    x: number;
+    y: number;
+}

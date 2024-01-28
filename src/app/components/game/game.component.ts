@@ -1,11 +1,12 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card, GameSlots } from '../../types';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { CARD_SPACE } from '../../constants';
 import { GameService } from '../../services/game/game.service';
 import { UtilService } from '../../services/util/util.service';
+import { AnimateHelperService } from '../../services/animate-helper/animate-helper.service';
 
 @Component({
   selector: 'app-game',
@@ -29,11 +30,17 @@ export class GameComponent implements OnInit {
 
   foundations: Card[][] = [];
 
+  animatingCards: Card[] = [];
+
+  animatingStyle: AnyObject = {};
+
   constructor(
     private deckService: DeckService,
     private gameService: GameService,
     private utilService: UtilService,
     private changeDetectorRef: ChangeDetectorRef,
+    private animateHelperService: AnimateHelperService,
+    readonly elementRef: ElementRef<HTMLElement>,
     @Inject(PLATFORM_ID) platformId: string,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -45,9 +52,35 @@ export class GameComponent implements OnInit {
     }
   }
 
-  moveSolvedPile(pileIndex: number, cardIndex: number): void {
-    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'solvedPiles', pileIndex, cardIndex }));
+  async solveWithAnimation(from: SolveFrom, to: SolveTo | null = null): Promise<void> {
+    const solvedGame = this.deckService.solve(this.getGameSlots(), from, to);
+    if (solvedGame.moved && solvedGame.to) { // apply the animation
+      this.setGameSlots(solvedGame.spliced.game);
+      this.animatingCards = solvedGame.spliced.cards;
+      this.animatingStyle = this.animateHelperService.getCardStartStyle(this.elementRef.nativeElement, from);
+      this.changeDetectorRef.detectChanges();
+
+      await this.utilService.wait(10);
+      this.animatingStyle = this.animateHelperService.getCardEndStyle(this.elementRef.nativeElement, solvedGame.to);
+      this.changeDetectorRef.detectChanges();
+
+      await this.utilService.wait(100);
+      this.animatingCards = [];
+    }
+    this.setGameSlots(solvedGame);
     this.changeDetectorRef.detectChanges();
+  }
+
+  moveSolvedPile(pileIndex: number, cardIndex: number): void {
+    this.solveWithAnimation({ prop: 'solvedPiles', pileIndex, cardIndex });
+  }
+
+  solveActiveStock(): void {
+    this.solveWithAnimation({ prop: 'activeStock' });
+  }
+
+  solveFoundation(pileIndex: number): void {
+    this.solveWithAnimation({ prop: 'foundations', pileIndex });
   }
 
   solveStock(): void {
@@ -55,22 +88,12 @@ export class GameComponent implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
-  solveActiveStock(): void {
-    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'activeStock' }));
-    this.changeDetectorRef.detectChanges();
-  }
-
-  solveFoundation(pileIndex: number): void {
-    this.setGameSlots(this.deckService.solve(this.getGameSlots(), { prop: 'foundations', pileIndex }));
-    this.changeDetectorRef.detectChanges();
-  }
-
   canAutoSolve(): boolean {
     return this.gameService.hasPiles(this.getGameSlots());
-  } 
+  }
 
   async autoSolve(): Promise<void> {
-    let game = this.getGameSlots();
+    /*let game = this.getGameSlots();
     let loop = 0;
     const limit = 99;
     while (++loop < limit && !this.gameService.isGameEnded(game)) {
@@ -78,7 +101,7 @@ export class GameComponent implements OnInit {
       game = this.gameService.solveNext(game);
       this.setGameSlots(JSON.parse(JSON.stringify(game)));
       this.changeDetectorRef.detectChanges();
-    }
+    }*/
   }
 
   getSolvedPileStyle(offset: number): AnyObject {

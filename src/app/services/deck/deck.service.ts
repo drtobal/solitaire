@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Card, CardColor, CardNumber, CardType, DeckDefinition, GameMoved, GameSlots, SolveFrom, SolveTo, SpliceCards } from '../../types';
+import { Card, CardColor, CardNumber, CardType, DeckDefinition, FullCameMoved, GameMoved, GameSlots, SolveFrom, SolveTo, SpliceCards } from '../../types';
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
 
 @Injectable({
@@ -93,19 +93,19 @@ export class DeckService {
     return game;
   }
 
-  solve(game: GameSlots, from: SolveFrom, to: SolveTo | null = null): GameMoved {
+  solve(game: GameSlots, from: SolveFrom, to: SolveTo | null = null): FullCameMoved {
     const spliced = this.spliceCards(game, from);
-    if (spliced.cards.length === 0) return { ...game, moved: false };
+    if (spliced.cards.length === 0) return { ...game, spliced, moved: false };
 
     if (to !== null) {
-      if (!this.isDropValid(game, spliced.cards[0], to)) return { ...game, moved: false };
+      if (!this.isDropValid(game, spliced.cards[0], to)) return { ...game, spliced, moved: false };
     } else {
       to = this.getDroppableStock(game, spliced.cards[0]);
     }
 
-    if (to === null) return { ...game, moved: false };
+    if (to === null) return { ...game, spliced, moved: false };
 
-    return { ...this.makeMove(game, from, spliced, to), moved: true };
+    return { ...this.makeMove(game, from, spliced, to), spliced, to, moved: true };
   }
 
   makeMove(game: GameSlots, from: SolveFrom, spliced: SpliceCards, to: SolveTo): GameSlots {

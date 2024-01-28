@@ -6,6 +6,8 @@ export const PILES = 7;
 
 export const CARD_SPACE = 0.25;
 
+export const REM_PX = 16;
+
 export enum CardTypeL {
     club = 'club',
     diamond = 'diamond',
