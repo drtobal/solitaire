@@ -9,7 +9,9 @@
     }
 
     <app-card cdkDrag [cdkDragDisabled]="dragDisabled" (cdkDragStarted)="cdkDragStarted(cards.length -1)"
-        (click)="clickCard.emit(cards.length -1)" [card]="getLastCard()" [visible]="visible"></app-card>
+        (cdkDragEnded)="cdkDragEnded()" (click)="clickCard.emit(cards.length -1)"[card]="getLastCard()"
+        [visible]="visible"></app-card>
+
     } @else {
     @for (card of cards; track x;let x = $index) {
     @if (dragIndex === -1 || x <= dragIndex) {

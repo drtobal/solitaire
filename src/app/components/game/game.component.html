@@ -4,11 +4,13 @@
         <div class="pile-container">
             <app-pile class="foundation index-{{index}}" [cards]="foundation" [visible]="true"
                 (click)="solveFoundation(index)" [hasDrop]="!!dragFrom"
+                (dragStarted)="dragStarted({prop: 'foundations', pileIndex: index})" (dragEnded)="dragEnded()"
                 (dropped)="dropped({prop: 'foundations', index: index})"></app-pile>
         </div>
         }
         <div class="separator"></div>
-        <app-pile class="active-stock" [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"></app-pile>
+        <app-pile class="active-stock" [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"
+            (dragStarted)="dragStarted({prop: 'activeStock'})" (dragEnded)="dragEnded()"></app-pile>
         <app-pile class="stock" [cards]="stock" [visible]="false" [dragDisabled]="true"
             (click)="solveStock()"></app-pile>
     </div>

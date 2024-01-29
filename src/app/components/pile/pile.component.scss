@@ -40,14 +40,15 @@
     left: 0;
     width: var(--card-width);
     height: var(--card-height);
-    border-radius: 0.5rem;
     background-color: whitesmoke;
-    border: 2px solid whitesmoke;
 }
 
 ::ng-deep {
     .cdk-drag-placeholder {
         opacity: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
     }
 
     .cdk-drag-animating {
