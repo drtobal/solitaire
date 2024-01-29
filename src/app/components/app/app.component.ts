@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { GameComponent } from '../game/game.component';
 
+/** main application component */
 @Component({
   selector: 'app-root',
   standalone: true,

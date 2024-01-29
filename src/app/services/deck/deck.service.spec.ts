@@ -64,7 +64,7 @@ describe('DeckService', () => {
     for (let x = 1; x <= 10; x++) {
       cards.push(heart(x));
     }
-    expect(service.generatePiles([])).toBeDefined();
+    expect(service.generatePiles([], 7)).toBeDefined();
     expect(service.generatePiles(cards, 4)).toEqual({
       piles: [
         [],
@@ -104,7 +104,7 @@ describe('DeckService', () => {
       { color: blackC, type: clubT },
       { color: redC, type: diamondT },
     ];
-    expect(service.generateDecks(definitions).length).toBeGreaterThan(1);
+    expect(service.generateDecks(definitions, 13).length).toBeGreaterThan(1);
     expect(service.generateDecks(definitions, 3)).toEqual([
       club(1), club(2), club(3),
       diamond(1), diamond(2), diamond(3),
@@ -112,7 +112,7 @@ describe('DeckService', () => {
   });
 
   it('should generate a deck', () => {
-    expect(service.generateDeck(spadeT, blackC).length).toBeGreaterThan(1);
+    expect(service.generateDeck(spadeT, blackC, 13).length).toBeGreaterThan(1);
     expect(service.generateDeck(spadeT, blackC, 4)).toEqual([spade(1), spade(2), spade(3), spade(4)]);
   });
 

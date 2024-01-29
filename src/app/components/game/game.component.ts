@@ -8,43 +8,56 @@ import { UtilService } from '../../services/util/util.service';
 import { AnimateHelperService } from '../../services/animate-helper/animate-helper.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
+import { ConfigService } from '../../services/config/config.service';
 
+/** main game component, this component apply functios to every component needed to play */
 @Component({
   selector: 'app-game',
   standalone: true,
   imports: [CommonModule, PileComponent, DragDropModule, ThemeSelectorComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
+  providers: [ConfigService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameComponent implements OnInit {
   /** check if the code is running in server side or browser */
   isBrowser: boolean = false;
 
+  /** cards of stock pile */
   stock: Card[] = [];
 
+  /** cards of active stock pile */
   activeStock: Card[] = [];
 
+  /** folded piles */
   piles: Card[][] = [];
 
+  /** visible piles */
   solvedPiles: Card[][] = [];
 
+  /** four foundations of the game */
   foundations: Card[][] = [];
 
+  /** copy of cards that are currently animating */
   animatingCards: Card[] = [];
 
+  /** just css properties to animate cards */
   animatingStyle: AnyObject = {};
 
+  /** from data needed to solve a movement assigned when starts dragging */
   dragFrom: SolveFrom | null = null;
 
+  /** check if game is ended, when all piles are solved */
   isGameEnded: boolean = false;
 
-  isStockEnded: boolean = false;
-
+  /** snapshots of previous versoins of the game to allow user to undo a movement */
   snapshots: GameSlots[] = [];
 
+  /** movements counting */
   movements: number = 0;
 
+  /** component constructor */
   constructor(
     private deckService: DeckService,
     private gameService: GameService,
@@ -57,6 +70,7 @@ export class GameComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
+  /** set up the game */
   ngOnInit(): void {
     if (this.isBrowser) {
       const game = this.deckService.generateGame();
@@ -65,6 +79,7 @@ export class GameComponent implements OnInit {
     }
   }
 
+  /** solve a movement and triggers an animation of the card(s) being solved */
   async solveWithAnimation(from: SolveFrom, to: SolveTo | null = null): Promise<void> {
     const snapshot = UtilService.deepClone(this.getGameSlots());
     const solvedGame = this.deckService.solve(this.getGameSlots(), from, to);
@@ -83,24 +98,27 @@ export class GameComponent implements OnInit {
     }
     this.setGameSlots(solvedGame);
     this.isGameEnded = this.gameService.isGameEnded(solvedGame);
-    this.isStockEnded = this.gameService.isStockEnded(solvedGame);
     this.snapshots.push(snapshot);
     this.movements++;
     this.changeDetectorRef.detectChanges();
   }
 
+  /** solve from a solved pile */
   moveSolvedPile(pileIndex: number, cardIndex: number): void {
     this.solveWithAnimation({ prop: 'solvedPiles', pileIndex, cardIndex });
   }
 
+  /** solve from acitive stock pile */
   solveActiveStock(): void {
     this.solveWithAnimation({ prop: 'activeStock' });
   }
 
+  /** solve from a foundation pile */
   solveFoundation(pileIndex: number): void {
     this.solveWithAnimation({ prop: 'foundations', pileIndex });
   }
 
+  /** solve stock, can fold it or reverse all the active stock */
   async solveStock(): Promise<void> {
     const snapshot = UtilService.deepClone(this.getGameSlots());
     const game = this.deckService.solveStock(this.getGameSlots());
@@ -126,15 +144,18 @@ export class GameComponent implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
-  canAutoSolve(): boolean {
-    return this.gameService.hasPiles(this.getGameSlots());
-  }
+  /** check if the game can be auto completed, not implemented yet */
+  // canAutoSolve(): boolean {
+  //   return this.gameService.hasPiles(this.getGameSlots());
+  // }
 
+  /** assign some data whe user starts dragging some cards */
   dragStarted(data: SolveFrom): void {
     this.dragFrom = data;
     this.changeDetectorRef.detectChanges();
   }
 
+  /** try to solve the dropped cards */
   dropped(solveTo: SolveTo): void {
     if (this.dragFrom) {
       const snapshot = UtilService.deepClone(this.getGameSlots());
@@ -148,6 +169,7 @@ export class GameComponent implements OnInit {
     }
   }
 
+  /** clear data when user end the dragging function */
   dragEnded(): void {
     setTimeout(() => { // allow to fire drop before clean
       this.dragFrom = null;
@@ -155,18 +177,20 @@ export class GameComponent implements OnInit {
     }, 10);
   }
 
-  async autoSolve(): Promise<void> {
-    /*let game = this.getGameSlots();
-    let loop = 0;
-    const limit = 99;
-    while (++loop < limit && !this.gameService.isGameEnded(game)) {
-      await this.utilService.wait(50);
-      game = this.gameService.solveNext(game);
-      this.setGameSlots(JSON.parse(JSON.stringify(game)));
-      this.changeDetectorRef.detectChanges();
-    }*/
-  }
+  /** auto complete all cards left, not implemented yet */
+  // async autoSolve(): Promise<void> {
+  //   let game = this.getGameSlots();
+  //   let loop = 0;
+  //   const limit = 99;
+  //   while (++loop < limit && !this.gameService.isGameEnded(game)) {
+  //     await this.utilService.wait(50);
+  //     game = this.gameService.solveNext(game);
+  //     this.setGameSlots(JSON.parse(JSON.stringify(game)));
+  //     this.changeDetectorRef.detectChanges();
+  //   }
+  // }
 
+  /** transform current game into a slots format to apply functions */
   getGameSlots(): GameSlots {
     return {
       stock: this.stock,
@@ -177,6 +201,7 @@ export class GameComponent implements OnInit {
     };
   }
 
+  /** set to playing game from a object game */
   setGameSlots(slots: GameSlots): void {
     this.stock = slots.stock;
     this.activeStock = slots.activeStock;
@@ -185,6 +210,7 @@ export class GameComponent implements OnInit {
     this.foundations = slots.foundations;
   }
 
+  /** undo movement function */
   undo(): void {
     if (this.snapshots.length === 1) {
       this.setGameSlots(UtilService.deepClone(this.snapshots.slice(-1)[0])); // start of the game

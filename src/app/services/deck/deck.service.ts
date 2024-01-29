@@ -3,97 +3,12 @@ import { Card, CardColor, CardNumber, CardType, DeckDefinition, FullCameMoved, G
 import { DECKS, DECK_SIZE, PILES } from '../../constants';
 import { UtilService } from '../util/util.service';
 
+/** functions to work with decks and cards */
 @Injectable({
   providedIn: 'root'
 })
 export class DeckService {
-  /** suffle the array - modern version of the Fisher–Yates shuffle */
-  shuffle<T>(array: T[]): T[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
-    return array;
-  }
-
-  consecutiveArray(from: number, to: number): number[] {
-    const result: number[] = [];
-    for (let x = from; x <= to; x++) {
-      result.push(x);
-    }
-    return result;
-  }
-
-  generateGame(): GameSlots {
-    const pilesResult = this.generatePiles(this.shuffle(this.generateDecks(DECKS)));
-    const gameSlots = {
-      stock: pilesResult.mod,
-      activeStock: [],
-      piles: pilesResult.piles,
-      solvedPiles: pilesResult.solvedPiles,
-      foundations: this.fillArray<Card>([], DECKS.length),
-    };
-    return gameSlots;
-  }
-
-  generatePiles(cards: Card[], length: number = PILES): { piles: Card[][], solvedPiles: Card[][], mod: Card[] } {
-    const piles = this.fillArray<Card>([], length);
-    const solvedPiles = this.fillArray<Card>([], length);
-    for (let x = 0; x < length; x++) {
-      solvedPiles[x].push(cards.shift()!);
-      piles[x] = cards.splice(0, x);
-    }
-    return { piles, solvedPiles, mod: cards };
-  }
-
-  fillArray<T>(arr: T[][], length: number): T[][] {
-    const diff = length - arr.length;
-    for (let x = 0; x < diff; x++) {
-      arr.push([]);
-    }
-    return arr;
-  }
-
-  generateDecks(definitions: DeckDefinition[], size: number = DECK_SIZE): Card[] {
-    let decks: Card[] = [];
-    const decksLength = definitions.length;
-    for (let x = 0; x < decksLength; x++) {
-      decks = decks.concat(this.generateDeck(definitions[x].type, definitions[x].color, size));
-    }
-    return decks;
-  }
-
-  generateDeck(type: CardType, color: CardColor, size: number = DECK_SIZE): Card[] {
-    const deck: Card[] = [];
-    for (let number = 1; number <= size; number++) {
-      deck.push({ number: number as CardNumber, color, type });
-    }
-    return deck;
-  }
-
-  isValidMove(a: Card, b: Card, isFoundation: boolean): boolean {
-    if (!a || !b) return false;
-
-    if (isFoundation) return a.number + 1 === b.number && a.type === b.type;
-
-    return a.number - 1 === b.number && a.color !== b.color;
-  }
-
-  solveStock(_game: GameSlots): GameSlots {
-    const game = UtilService.deepClone(_game);
-    if (game.stock.length > 0) {
-      game.activeStock.push(game.stock.pop()!);
-      game.activeStock = [...game.activeStock];
-      game.stock = [...game.stock];
-    } else {
-      game.stock = game.activeStock.reverse();
-      game.activeStock = [];
-    }
-    return game;
-  }
-
+  /** solve a movement if it's a valid move */
   solve(game: GameSlots, from: SolveFrom, to: SolveTo | null = null): FullCameMoved {
     const spliced = this.spliceCards(game, from);
     if (spliced.cards.length === 0) return { ...game, spliced, moved: false };
@@ -108,6 +23,102 @@ export class DeckService {
     return { ...this.makeMove(game, from, spliced, to), spliced, to, moved: true };
   }
 
+  /** suffle the array - modern version of the Fisher–Yates shuffle */
+  shuffle<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+    return array;
+  }
+
+  /** generate a consecutive array from from to to included */
+  consecutiveArray(from: number, to: number): number[] {
+    const result: number[] = [];
+    for (let x = from; x <= to; x++) {
+      result.push(x);
+    }
+    return result;
+  }
+
+  /** generate a random cards game, TODO: imeplement a algorithm to make winnable games */
+  generateGame(): GameSlots {
+    const pilesResult = this.generatePiles(this.shuffle(this.generateDecks(DECKS, DECK_SIZE)), PILES);
+    const gameSlots = {
+      stock: pilesResult.mod,
+      activeStock: [],
+      piles: pilesResult.piles,
+      solvedPiles: pilesResult.solvedPiles,
+      foundations: this.fillArray<Card>([], DECKS.length),
+    };
+    return gameSlots;
+  }
+
+  /** generate piles using solitaire pile format */
+  generatePiles(cards: Card[], length: number): { piles: Card[][], solvedPiles: Card[][], mod: Card[] } {
+    const piles = this.fillArray<Card>([], length);
+    const solvedPiles = this.fillArray<Card>([], length);
+    for (let x = 0; x < length; x++) {
+      solvedPiles[x].push(cards.shift()!);
+      piles[x] = cards.splice(0, x);
+    }
+    return { piles, solvedPiles, mod: cards };
+  }
+
+  /** fill a array with n empty arrays */
+  fillArray<T>(arr: T[][], length: number): T[][] {
+    const diff = length - arr.length;
+    for (let x = 0; x < diff; x++) {
+      arr.push([]);
+    }
+    return arr;
+  }
+
+  /** generate decks, normal is to 4 decks */
+  generateDecks(definitions: DeckDefinition[], size: number): Card[] {
+    let decks: Card[] = [];
+    const decksLength = definitions.length;
+    for (let x = 0; x < decksLength; x++) {
+      decks = decks.concat(this.generateDeck(definitions[x].type, definitions[x].color, size));
+    }
+    return decks;
+  }
+
+  /** generate a single deck of cards from 1 to size, normal is 13 cards per deck */
+  generateDeck(type: CardType, color: CardColor, size: number): Card[] {
+    const deck: Card[] = [];
+    for (let number = 1; number <= size; number++) {
+      deck.push({ number: number as CardNumber, color, type });
+    }
+    return deck;
+  }
+
+  /** check if requested move is valid */
+  isValidMove(a: Card, b: Card, isFoundation: boolean): boolean {
+    if (!a || !b) return false;
+
+    if (isFoundation) return a.number + 1 === b.number && a.type === b.type;
+
+    return a.number - 1 === b.number && a.color !== b.color;
+  }
+
+  /** apply move from stock to solve stock, or reverse all the solve stock to stock again */
+  solveStock(_game: GameSlots): GameSlots {
+    const game = UtilService.deepClone(_game);
+    if (game.stock.length > 0) {
+      game.activeStock.push(game.stock.pop()!);
+      game.activeStock = [...game.activeStock];
+      game.stock = [...game.stock];
+    } else {
+      game.stock = game.activeStock.reverse();
+      game.activeStock = [];
+    }
+    return game;
+  }
+
+  /** move cards from from to to */
   makeMove(game: GameSlots, from: SolveFrom, spliced: SpliceCards, to: SolveTo): GameSlots {
     game[from.prop] = [...spliced.game[from.prop] as Card[] & Card[][]];
     game[to.prop][to.index] = [...game[to.prop][to.index].concat(spliced.cards)];
@@ -124,6 +135,7 @@ export class DeckService {
     return game;
   }
 
+  /** check if drop requested is valid */
   isDropValid(game: GameSlots, card: Card, to: SolveTo): boolean {
     switch (to.prop) {
       case 'foundations':
@@ -133,6 +145,7 @@ export class DeckService {
     }
   }
 
+  /** check if drop requested is valid when try to drop on a foundation pile */
   isDropValidFoundation(game: GameSlots, card: Card, to: SolveTo): boolean {
     const pile = game.foundations[to.index];
     if (!Array.isArray(pile)) return false;
@@ -142,6 +155,7 @@ export class DeckService {
     return this.isValidMove(pile[pile.length - 1], card, true);
   }
 
+  /** check if drop requested is valid when try to drop on a solved pile */
   isDropValidSolvedPiles(game: GameSlots, card: Card, to: SolveTo): boolean {
     const pile = game.solvedPiles[to.index];
     if (!Array.isArray(pile)) return false;
@@ -151,6 +165,7 @@ export class DeckService {
     return this.isValidMove(pile[pile.length - 1], card, false);
   }
 
+  /** finds a pile to drop the given card */
   getDroppableStock(game: GameSlots, card: Card, skipFoundation: boolean): SolveTo | null {
     let index = -1;
     if (!skipFoundation) {
@@ -164,6 +179,7 @@ export class DeckService {
     return null;
   }
 
+  /** finds a solved pile to drop the given card */
   getDroppableSolvedPile(game: GameSlots, card: Card): number {
     const length = game.solvedPiles.length;
     const indexes = this.shuffle(this.consecutiveArray(0, length - 1));
@@ -181,6 +197,7 @@ export class DeckService {
     return -1;
   }
 
+  /** finds a foundation pile to drop the given card */
   getDroppableFoundation(game: GameSlots, card: Card): number {
     const foundationsLength = game.foundations.length;
     for (let x = 0; x < foundationsLength; x++) {
@@ -192,6 +209,7 @@ export class DeckService {
     return -1;
   }
 
+  /** splice cards from game given the from object */
   spliceCards(_game: GameSlots, from: SolveFrom): SpliceCards {
     const game = UtilService.deepClone(_game);
     switch (from.prop) {
@@ -221,6 +239,7 @@ export class DeckService {
     return { game, cards: [] };
   }
 
+  /** check if a and b are the same card */
   isSameCard(a?: Card, b?: Card): boolean {
     return !!(a && b && a.color === b.color && a.number === b.number && a.type === b.type);
   }

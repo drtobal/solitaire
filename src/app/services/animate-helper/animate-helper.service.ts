@@ -3,6 +3,7 @@ import { REM_PX } from '../../constants';
 import { AnyObject, SolveFrom, SolveTo } from '../../types';
 import { UtilService } from '../util/util.service';
 
+/** just som helper functions to cards animations */
 @Injectable({
   providedIn: 'root'
 })
@@ -12,6 +13,7 @@ export class AnimateHelperService {
     private utilService: UtilService,
   ) { /* do nothing */ }
 
+  /** get html element used as a source of the animation */
   getElementFrom(root: HTMLElement, from: SolveFrom): HTMLElement | null {
     switch (from.prop) {
       case 'activeStock':
@@ -26,6 +28,7 @@ export class AnimateHelperService {
     }
   }
 
+  /** get html element used as a target of the animation */
   getElementTo(root: HTMLElement, to: SolveTo): HTMLElement | null {
     switch (to.prop) {
       case 'foundations':
@@ -37,6 +40,7 @@ export class AnimateHelperService {
     }
   }
 
+  /** reutnr the top and left position of the given element, using vertical gap as optional */
   getElementPositionStyles(targetElement?: HTMLElement | null, gap: number = 0): AnyObject {
     if (targetElement) {
       const position = this.utilService.getOffset(targetElement as HTMLElement);
@@ -45,14 +49,17 @@ export class AnimateHelperService {
     return {};
   }
 
+  /** get position of the element of string selector */
   getCardStyleCustom(element: HTMLElement, selector: string): AnyObject {
     return this.getElementPositionStyles(element.querySelector(selector) as HTMLElement);
   }
 
+  /** get position fo element which is used as a start point */
   getCardStartStyle(element: HTMLElement, from: SolveFrom): AnyObject {
     return this.getElementPositionStyles(this.getElementFrom(element, from));
   }
 
+  /** get position fo element which is used as a end point */
   getCardEndStyle(element: HTMLElement, to: SolveTo): AnyObject {
     return this.getElementPositionStyles(this.getElementTo(element, to), 1.25 * REM_PX);
   }
