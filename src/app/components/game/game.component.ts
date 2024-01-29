@@ -9,12 +9,13 @@ import { AnimateHelperService } from '../../services/animate-helper/animate-help
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { ConfigService } from '../../services/config/config.service';
+import { FooterComponent } from '../footer/footer.component';
 
 /** main game component, this component apply functios to every component needed to play */
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule, PileComponent, DragDropModule, ThemeSelectorComponent],
+  imports: [CommonModule, PileComponent, DragDropModule, ThemeSelectorComponent, FooterComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   providers: [ConfigService],
