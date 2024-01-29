@@ -10,6 +10,12 @@
     gap: 1rem;
 }
 
+.game-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .piles {
     justify-content: space-between;
     min-height: 15rem;

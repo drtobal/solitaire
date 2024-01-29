@@ -3,15 +3,15 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inje
 import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
-import { CARD_SPACE } from '../../constants';
 import { GameService } from '../../services/game/game.service';
 import { UtilService } from '../../services/util/util.service';
 import { AnimateHelperService } from '../../services/animate-helper/animate-helper.service';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule, PileComponent],
+  imports: [CommonModule, PileComponent, DragDropModule],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,13 +116,18 @@ export class GameComponent implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
-  cdkDropListDropped(event: any): void {
-    console.log(event);
+  dropped(solveTo: SolveTo): void {
+    if (this.dragFrom) {
+      this.setGameSlots(this.deckService.solve(this.getGameSlots(), this.dragFrom, solveTo));
+      this.changeDetectorRef.detectChanges();
+    }
   }
 
   dragEnded(): void {
-    this.dragFrom = null;
-    this.changeDetectorRef.detectChanges();
+    setTimeout(() => { // allow to fire drop before clean
+      this.dragFrom = null;
+      this.changeDetectorRef.detectChanges();
+    }, 10);
   }
 
   async autoSolve(): Promise<void> {

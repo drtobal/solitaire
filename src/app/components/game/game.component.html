@@ -1,38 +1,41 @@
-<div class="top">
-    @for (foundation of foundations; track index; let index = $index) {
-    <div class="pile-container">
-        <app-pile class="foundation index-{{index}}" [cards]="foundation" [visible]="true"
-            (click)="solveFoundation(index)" [hasDrop]="!!dragFrom"></app-pile>
-        <div cdkDropList class="drop" (cdkDropListDropped)="cdkDropListDropped($event)"></div>
+<div cdkDropListGroup class="game-container">
+    <div class="top">
+        @for (foundation of foundations; track index; let index = $index) {
+        <div class="pile-container">
+            <app-pile class="foundation index-{{index}}" [cards]="foundation" [visible]="true"
+                (click)="solveFoundation(index)" [hasDrop]="!!dragFrom"
+                (dropped)="dropped({prop: 'foundations', index: index})"></app-pile>
+        </div>
+        }
+        <div class="separator"></div>
+        <app-pile class="active-stock" [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"></app-pile>
+        <app-pile class="stock" [cards]="stock" [visible]="false" [dragDisabled]="true"
+            (click)="solveStock()"></app-pile>
     </div>
-    }
-    <div class="separator"></div>
-    <app-pile class="active-stock" [cards]="activeStock" [visible]="true"
-        (click)="solveActiveStock()"></app-pile>
-    <app-pile class="stock" [cards]="stock" [visible]="false" (click)="solveStock()"></app-pile>
-</div>
 
-<div class="piles">
-    @for (pile of piles; track index; let index = $index) {
-    <div class="pile">
-        <app-pile [cards]="pile" [stacked]="false"></app-pile>
-        <app-pile class="solved-pile index-{{index}}" [placeholder]="false"
-            [cards]="solvedPiles[index]" [stacked]="false" [visible]="true" [hasDrop]="!!dragFrom"
-            (dragStarted)="dragStarted({prop: 'solvedPiles', pileIndex: index, cardIndex: $event})"
-            (dragEnded)="dragEnded()" (clickCard)="moveSolvedPile(index, $event)"></app-pile>
+    <div class="piles">
+        @for (pile of piles; track index; let index = $index) {
+        <div class="pile">
+            <app-pile [cards]="pile" [dragDisabled]="true" [stacked]="false"></app-pile>
+            <app-pile class="solved-pile index-{{index}}" [placeholder]="false" [cards]="solvedPiles[index]"
+                [stacked]="false" [visible]="true" [hasDrop]="!!dragFrom"
+                (dropped)="dropped({prop: 'solvedPiles', index: index})"
+                (dragStarted)="dragStarted({prop: 'solvedPiles', pileIndex: index, cardIndex: $event})"
+                (dragEnded)="dragEnded()" (clickCard)="moveSolvedPile(index, $event)"></app-pile>
+        </div>
+        }
     </div>
+
+    <div>
+        {{canAutoSolve() | json}}
+    </div>
+
+    <div>
+        <button (click)="autoSolve()">Auto Complete</button>
+    </div>
+
+    @if (animatingCards.length > 0) {
+    <app-pile class="animate-pile" [ngStyle]="animatingStyle" [cards]="animatingCards" [stacked]="false"
+        [visible]="true"></app-pile>
     }
 </div>
-
-<div>
-    {{canAutoSolve() | json}}
-</div>
-
-<div>
-    <button (click)="autoSolve()">Auto Complete</button>
-</div>
-
-@if (animatingCards.length > 0) {
-<app-pile class="animate-pile" [ngStyle]="animatingStyle" [cards]="animatingCards" [stacked]="false"
-    [visible]="true"></app-pile>
-}

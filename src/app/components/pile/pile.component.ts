@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { CARD_SPACE } from '../../constants';
-import { AnyObject, Card } from '../../types';
+import { Card, SolveTo } from '../../types';
 import { CardComponent } from '../card/card.component';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragRelease, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-pile',
@@ -24,18 +23,17 @@ export class PileComponent {
 
   @Input() placeholder: boolean = true;
 
+  @Input() dragDisabled: boolean = false;
+
   @Output() clickCard = new EventEmitter<number>();
 
   @Output() dragStarted = new EventEmitter<number>();
 
-  @Output() dragEnded = new EventEmitter<void>(); 
+  @Output() dragEnded = new EventEmitter<void>();
+
+  @Output() dropped = new EventEmitter<void>();
 
   dragIndex: number = -1;
-
-  /** component constructor */
-  constructor(
-    private changeDetectorRef: ChangeDetectorRef,
-  ) { /* do nothing */ }
 
   getLastCard(): Card {
     return this.cards[this.cards.length - 1];
@@ -49,9 +47,5 @@ export class PileComponent {
   cdkDragEnded(): void {
     this.dragIndex = -1;
     this.dragEnded.emit();
-  }
-
-  cdkDropListDropped(event: any): void {
-    console.log(event);
   }
 }

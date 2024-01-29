@@ -1,36 +1,44 @@
-<div cdkDropList class="list" connectedTo="drop">
+<div cdkDropList>
     @if (cards.length > 0) {
     @if (stacked) {
-    <app-card cdkDrag (cdkDragStarted)="cdkDragStarted(cards.length -1)" (click)="clickCard.emit(cards.length -1)"
-        [card]="getLastCard()" [visible]="visible"></app-card>
+
+    @if (cards.length > 1) {
+    <div class="placeholder-card">
+        <app-card [card]="cards[0]" [visible]="false"></app-card>
+    </div>
+    }
+
+    <app-card cdkDrag [cdkDragDisabled]="dragDisabled" (cdkDragStarted)="cdkDragStarted(cards.length -1)"
+        (click)="clickCard.emit(cards.length -1)" [card]="getLastCard()" [visible]="visible"></app-card>
     } @else {
     @for (card of cards; track x;let x = $index) {
-    @if (dragIndex === -1 || x <= dragIndex) { <div class="drag card-container" cdkDrag [ngClass]="{visible: visible}"
-        (cdkDragStarted)="cdkDragStarted(x)" (cdkDragEnded)="cdkDragEnded()">
-        <app-card (click)="clickCard.emit(x)" [card]="card" [visible]="visible"></app-card>
+    @if (dragIndex === -1 || x <= dragIndex) {
+        <div class="drag card-container" cdkDrag [cdkDragDisabled]="dragDisabled"
+            [ngClass]="{visible: visible}" (cdkDragStarted)="cdkDragStarted(x)" (cdkDragEnded)="cdkDragEnded()">
+            <app-card (click)="clickCard.emit(x)" [card]="card" [visible]="visible"></app-card>
 
-        <div *cdkDragPreview>
-            <div class="preview-container">
-                @for (preview of cards.slice(x); track y; let y = $index) {
-                <div class="card-container visible">
-                    <app-card [card]="preview" [visible]="true"></app-card>
+            <div *cdkDragPreview>
+                <div class="preview-container">
+                    @for (preview of cards.slice(x); track y; let y = $index) {
+                    <div class="card-container visible">
+                        <app-card [card]="preview" [visible]="true"></app-card>
+                    </div>
+                    }
                 </div>
-                }
             </div>
         </div>
-</div>
-}
-}
-}
-} @else {
-@if (placeholder) {
-<div class="placeholder-container">
-    <div class="placeholder"></div>
-</div>
-}
-}
+    }
+    }
+    }
+    } @else {
+        @if (placeholder) {
+            <div class="placeholder-container">
+                <div class="placeholder"></div>
+            </div>
+        }
+    }
 </div>
 
 @if (hasDrop) {
-<div cdkDropList connectedTo="drop" class="drop-list" (cdkDropListDropped)="cdkDropListDropped($event)"></div>
+<div cdkDropList class="drop-list" (cdkDropListDropped)="dropped.emit()"></div>
 }
