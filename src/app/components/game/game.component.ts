@@ -96,11 +96,11 @@ export class GameComponent implements OnInit {
       await this.utilService.wait(100);
 
       this.animatingCards = [];
+      this.movements++;
     }
     this.setGameSlots(solvedGame);
     this.isGameEnded = this.gameService.isGameEnded(solvedGame);
     this.snapshots.push(snapshot);
-    this.movements++;
     this.changeDetectorRef.detectChanges();
   }
 
