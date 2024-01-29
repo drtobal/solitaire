@@ -25,6 +25,8 @@ export class PileComponent {
 
   @Input() dragDisabled: boolean = false;
 
+  @Input() dropDisabled: boolean = false;
+
   @Output() clickCard = new EventEmitter<number>();
 
   @Output() dragStarted = new EventEmitter<number>();

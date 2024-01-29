@@ -11,7 +11,7 @@
     height: 0.5rem;
 
     &.visible {
-        height: 1.25rem;
+        height: 1rem;
     }
 }
 
@@ -24,7 +24,7 @@
     top: 0;
     left: 0;
     min-height: var(--card-height);
-    height: calc(var(--card-height) * 2);
+    height: calc(var(--card-height) * 4);
     width: var(--card-width);
 }
 
@@ -41,6 +41,8 @@
     width: var(--card-width);
     height: var(--card-height);
     background-color: whitesmoke;
+    background-color: #d7d7d7;
+    border-radius: 0.25rem;
 }
 
 ::ng-deep {

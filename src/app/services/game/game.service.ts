@@ -7,6 +7,7 @@ import { DeckService } from '../deck/deck.service';
   providedIn: 'root'
 })
 export class GameService {
+  /** component constructor */
   constructor(
     private deckService: DeckService,
   ) { /* do nothig */ }
@@ -81,6 +82,10 @@ export class GameService {
   isGameEnded(game: GameSlots): boolean {
     return this.arePilesEmpty(game.piles) && this.arePilesEmpty(game.solvedPiles) &&
       this.isPileEmpty(game.stock) && this.isPileEmpty(game.activeStock);
+  }
+
+  isStockEnded(game: GameSlots): boolean {
+    return this.isPileEmpty(game.activeStock) && this.isPileEmpty(game.stock);
   }
 
   isPileEmpty(pile: Card[]): boolean {

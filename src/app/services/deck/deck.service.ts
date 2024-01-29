@@ -27,7 +27,7 @@ export class DeckService {
   }
 
   generateGame(): GameSlots {
-    const pilesResult = this.generatePiles(this.generateDecks(DECKS));
+    const pilesResult = this.generatePiles(this.shuffle(this.generateDecks(DECKS)));
     const gameSlots = {
       stock: pilesResult.mod,
       activeStock: [],

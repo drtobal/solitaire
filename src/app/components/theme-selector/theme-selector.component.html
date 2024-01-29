@@ -1,0 +1,6 @@
+<p class="label">Theme:</p>
+<select class="select" [(ngModel)]="current" (change)="onChange(current)">
+    @for (theme of themes; track $index) {
+    <option [ngValue]="theme">{{theme.name}}</option>
+    }
+</select>

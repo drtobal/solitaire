@@ -60,3 +60,8 @@ export type Coords2D = {
     x: number;
     y: number;
 }
+
+export type CardTheme = {
+    name: string;
+    source: string;
+};

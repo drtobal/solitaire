@@ -7,11 +7,12 @@ import { GameService } from '../../services/game/game.service';
 import { UtilService } from '../../services/util/util.service';
 import { AnimateHelperService } from '../../services/animate-helper/animate-helper.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule, PileComponent, DragDropModule],
+  imports: [CommonModule, PileComponent, DragDropModule, ThemeSelectorComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +36,10 @@ export class GameComponent implements OnInit {
   animatingStyle: AnyObject = {};
 
   dragFrom: SolveFrom | null = null;
+
+  isGameEnded: boolean = false;
+
+  isStockEnded: boolean = false;
 
   constructor(
     private deckService: DeckService,
@@ -70,6 +75,8 @@ export class GameComponent implements OnInit {
       this.animatingCards = [];
     }
     this.setGameSlots(solvedGame);
+    this.isGameEnded = this.gameService.isGameEnded(solvedGame);
+    this.isStockEnded = this.gameService.isStockEnded(solvedGame);
     this.changeDetectorRef.detectChanges();
   }
 

@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { CardTypeL } from '../../constants';
-import { AnyObject, Card, Coords2D } from '../../types';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { CardTypeL, DEFAULT_THEME } from '../../constants';
+import { AnyObject, Card, CardTheme, Coords2D } from '../../types';
+import { Subscription } from 'rxjs';
+import { ConfigService } from '../../services/config/config.service';
 
 const VER_GAP = 4;
 
@@ -19,17 +21,40 @@ const CARD_HEIGHT = 60;
   styleUrl: './card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CardComponent {
+export class CardComponent implements OnInit, OnDestroy {
   @Input() card?: Card;
 
   @Input() visible: boolean = false;
 
   cardTypes = CardTypeL;
 
+  themeSub?: Subscription;
+
+  cardTheme: CardTheme = DEFAULT_THEME;
+
+  /** component constructor */
+  constructor(
+    private configService: ConfigService,
+    private changeDetectorRef: ChangeDetectorRef,
+  ) { /* do nothing */ }
+
+  ngOnInit(): void {
+    this.themeSub = this.configService.cardTheme.subscribe(this.onCardTheme.bind(this));
+  }
+
+  ngOnDestroy(): void {
+    this.themeSub?.unsubscribe();
+  }
+
+  onCardTheme(cardTheme: CardTheme): void {
+    this.cardTheme = cardTheme;
+    this.changeDetectorRef.detectChanges();
+  }
+
   getCardStyle(card?: Card): AnyObject {
     const coords = this.getTypeCoords(card);
     return {
-      'background-image': `url(/assets/cards/deck_classic_light_2color_1.png)`,
+      'background-image': `url(/assets/cards/${this.cardTheme.source}.png)`,
       'background-position': `-${coords.x}px -${coords.y}px`,
     };
   }

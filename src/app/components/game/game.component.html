@@ -1,4 +1,8 @@
 <div cdkDropListGroup class="game-container">
+    <div class="header">
+        <app-theme-selector></app-theme-selector>
+    </div>
+
     <div class="top">
         @for (foundation of foundations; track index; let index = $index) {
         <div class="pile-container">
@@ -9,16 +13,17 @@
         </div>
         }
         <div class="separator"></div>
-        <app-pile class="active-stock" [cards]="activeStock" [visible]="true" (click)="solveActiveStock()"
-            (dragStarted)="dragStarted({prop: 'activeStock'})" (dragEnded)="dragEnded()"></app-pile>
-        <app-pile class="stock" [cards]="stock" [visible]="false" [dragDisabled]="true"
+        <app-pile class="active-stock" [dropDisabled]="true" [cards]="activeStock" [visible]="true"
+            (click)="solveActiveStock()" (dragStarted)="dragStarted({prop: 'activeStock'})"
+            (dragEnded)="dragEnded()"></app-pile>
+        <app-pile class="stock" [cards]="stock" [visible]="false" [dragDisabled]="true" [dropDisabled]="true"
             (click)="solveStock()"></app-pile>
     </div>
 
     <div class="piles">
         @for (pile of piles; track index; let index = $index) {
         <div class="pile">
-            <app-pile [cards]="pile" [dragDisabled]="true" [stacked]="false"></app-pile>
+            <app-pile [cards]="pile" [dragDisabled]="true" [dropDisabled]="true" [stacked]="false"></app-pile>
             <app-pile class="solved-pile index-{{index}}" [placeholder]="false" [cards]="solvedPiles[index]"
                 [stacked]="false" [visible]="true" [hasDrop]="!!dragFrom"
                 (dropped)="dropped({prop: 'solvedPiles', index: index})"
@@ -28,13 +33,17 @@
         }
     </div>
 
-    <div>
-        {{canAutoSolve() | json}}
-    </div>
-
+    <!--
+    @if (canAutoSolve()) {
     <div>
         <button (click)="autoSolve()">Auto Complete</button>
     </div>
+    }
+    -->
+
+    @if (isGameEnded && isStockEnded) {
+    <h1>Congratulations!!!</h1>
+    }
 
     @if (animatingCards.length > 0) {
     <app-pile class="animate-pile" [ngStyle]="animatingStyle" [cards]="animatingCards" [stacked]="false"

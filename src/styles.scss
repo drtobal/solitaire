@@ -1,5 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
 
+html,
+body {
+    background-color: #f3f7ff;
+    height: 100%;
+}
+body {
+    margin: 0;
+    font-family: 'Changa', sans-serif;
+}
+
+*,
+:after,
+:before {
+    box-sizing: border-box;
+}
+
 :root {
     --card-width: 40px;
     --card-height: 60px;
