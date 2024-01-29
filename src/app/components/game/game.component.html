@@ -1,6 +1,8 @@
 <div cdkDropListGroup class="game-container">
     <div class="header">
         <app-theme-selector></app-theme-selector>
+
+        <button (click)="undo()">Undo</button>
     </div>
 
     <div class="top">
@@ -42,7 +44,7 @@
     -->
 
     @if (isGameEnded && isStockEnded) {
-    <h1>Congratulations!!!</h1>
+    <h1 class="congratulations">Congratulations!!!</h1>
     }
 
     @if (animatingCards.length > 0) {

@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
+import { AnyObject, Card, FullCameMoved, GameSlots, SolveFrom, SolveTo } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { GameService } from '../../services/game/game.service';
@@ -41,6 +41,8 @@ export class GameComponent implements OnInit {
 
   isStockEnded: boolean = false;
 
+  snapshots: GameSlots[] = [];
+
   constructor(
     private deckService: DeckService,
     private gameService: GameService,
@@ -55,11 +57,14 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      this.setGameSlots(this.deckService.generateGame());
+      const game = this.deckService.generateGame();
+      this.setGameSlots(game);
+      this.snapshots.push(UtilService.deepClone(game));
     }
   }
 
   async solveWithAnimation(from: SolveFrom, to: SolveTo | null = null): Promise<void> {
+    const snapshot = UtilService.deepClone(this.getGameSlots());
     const solvedGame = this.deckService.solve(this.getGameSlots(), from, to);
     if (solvedGame.moved && solvedGame.to) { // apply the animation
       this.setGameSlots(solvedGame.spliced.game);
@@ -77,6 +82,7 @@ export class GameComponent implements OnInit {
     this.setGameSlots(solvedGame);
     this.isGameEnded = this.gameService.isGameEnded(solvedGame);
     this.isStockEnded = this.gameService.isStockEnded(solvedGame);
+    this.snapshots.push(snapshot);
     this.changeDetectorRef.detectChanges();
   }
 
@@ -93,6 +99,7 @@ export class GameComponent implements OnInit {
   }
 
   async solveStock(): Promise<void> {
+    const snapshot = UtilService.deepClone(this.getGameSlots());
     const game = this.deckService.solveStock(this.getGameSlots());
     if (this.stock.length > 0) {
       this.animatingCards = this.stock.slice(-1);
@@ -111,6 +118,7 @@ export class GameComponent implements OnInit {
       this.animatingCards = [];
     }
     this.setGameSlots(game);
+    this.snapshots.push(snapshot);
     this.changeDetectorRef.detectChanges();
   }
 
@@ -125,8 +133,13 @@ export class GameComponent implements OnInit {
 
   dropped(solveTo: SolveTo): void {
     if (this.dragFrom) {
-      this.setGameSlots(this.deckService.solve(this.getGameSlots(), this.dragFrom, solveTo));
-      this.changeDetectorRef.detectChanges();
+      const snapshot = UtilService.deepClone(this.getGameSlots());
+      const solvedGame = this.deckService.solve(this.getGameSlots(), this.dragFrom, solveTo);
+      if (solvedGame.moved) {
+        this.setGameSlots(solvedGame);
+        this.snapshots.push(snapshot);
+        this.changeDetectorRef.detectChanges();
+      }
     }
   }
 
@@ -165,5 +178,17 @@ export class GameComponent implements OnInit {
     this.piles = slots.piles;
     this.solvedPiles = slots.solvedPiles;
     this.foundations = slots.foundations;
+  }
+
+  undo(): void {
+    if (this.snapshots.length === 1) {
+      this.setGameSlots(UtilService.deepClone(this.snapshots.slice(-1)[0])); // start of the game
+    } else {
+      const game = this.snapshots.pop();
+      if (game) {
+        this.setGameSlots(game);
+      }
+    }
+    this.changeDetectorRef.detectChanges();
   }
 }

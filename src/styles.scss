@@ -5,9 +5,18 @@ body {
     background-color: #f3f7ff;
     height: 100%;
 }
+
 body {
     margin: 0;
-    font-family: 'Changa', sans-serif;
+}
+
+body,
+button, 
+select {
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
 }
 
 *,
