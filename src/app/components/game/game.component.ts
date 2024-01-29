@@ -43,6 +43,8 @@ export class GameComponent implements OnInit {
 
   snapshots: GameSlots[] = [];
 
+  movements: number = 0;
+
   constructor(
     private deckService: DeckService,
     private gameService: GameService,
@@ -83,6 +85,7 @@ export class GameComponent implements OnInit {
     this.isGameEnded = this.gameService.isGameEnded(solvedGame);
     this.isStockEnded = this.gameService.isStockEnded(solvedGame);
     this.snapshots.push(snapshot);
+    this.movements++;
     this.changeDetectorRef.detectChanges();
   }
 
@@ -119,6 +122,7 @@ export class GameComponent implements OnInit {
     }
     this.setGameSlots(game);
     this.snapshots.push(snapshot);
+    this.movements++;
     this.changeDetectorRef.detectChanges();
   }
 
@@ -138,6 +142,7 @@ export class GameComponent implements OnInit {
       if (solvedGame.moved) {
         this.setGameSlots(solvedGame);
         this.snapshots.push(snapshot);
+        this.movements++;
         this.changeDetectorRef.detectChanges();
       }
     }
@@ -189,6 +194,7 @@ export class GameComponent implements OnInit {
         this.setGameSlots(game);
       }
     }
+    this.movements++;
     this.changeDetectorRef.detectChanges();
   }
 }
