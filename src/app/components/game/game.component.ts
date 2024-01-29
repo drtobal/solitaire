@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AnyObject, Card, FullCameMoved, GameSlots, SolveFrom, SolveTo } from '../../types';
+import { AnyObject, Card, GameSlots, SolveFrom, SolveTo } from '../../types';
 import { DeckService } from '../../services/deck/deck.service';
 import { PileComponent } from '../pile/pile.component';
 import { GameService } from '../../services/game/game.service';

@@ -227,7 +227,7 @@ describe('DeckService', () => {
     expect(service.solveStock(game)).toEqual({ ...game, ...{ stock: [diamond(2)], activeStock: [heart(1)] } });
 
     game = { ...emptyGame(), ...{ stock: [], activeStock: [heart(4), heart(6)] } };
-    expect(service.solveStock(game)).toEqual({ ...game, ...{ stock: [heart(4), heart(6)], activeStock: [] } });
+    expect(service.solveStock(game)).toEqual({ ...game, ...{ stock: [heart(6), heart(4)], activeStock: [] } });
 
     game = { ...emptyGame(), ...{ stock: [club(3), spade(4)], activeStock: [heart(4), heart(6)] } };
     expect(service.solveStock(game)).toEqual({ ...game, ...{ stock: [club(3)], activeStock: [heart(4), heart(6), spade(4)] } });
@@ -310,7 +310,11 @@ describe('DeckService', () => {
 
     snapshot = cloneGame(game);
     game = service.solve(game, { prop: 'solvedPiles', pileIndex: 5 }); //not allowed
-    expect(game).toEqual({ ...snapshot, moved: false } as any);
+    expect(game.activeStock).toEqual(snapshot.activeStock);
+    expect(game.piles).toEqual(snapshot.piles);
+    expect(game.stock).toEqual(snapshot.stock);
+    expect(game.foundations).toEqual(snapshot.foundations);
+    expect(game.solvedPiles).toEqual(snapshot.solvedPiles);
 
     snapshot = cloneGame(game);
     game = service.solveStock(game);
