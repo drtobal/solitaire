@@ -5,14 +5,19 @@ import { AnyObject, Card, CardTheme, Coords2D } from '../../types';
 import { Subscription } from 'rxjs';
 import { ConfigService } from '../../services/config/config.service';
 
+/** vertical gap for card background image used as tiles photo */
 const VER_GAP = 4;
 
+/** horizontal gap for card background image used as tiles photo */
 const HOR_GAP = 24;
 
+/** card width for card background image used as tiles photo */
 const CARD_WIDTH = 40;
 
+/** card height for card background image used as tiles photo */
 const CARD_HEIGHT = 60;
 
+/** displays a card both faces */
 @Component({
   selector: 'app-card',
   standalone: true,
@@ -22,14 +27,19 @@ const CARD_HEIGHT = 60;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent implements OnInit, OnDestroy {
+  /** card to display */
   @Input() card?: Card;
 
+  /** show backface if it's not visible */
   @Input() visible: boolean = false;
 
+  /** list of card types */
   cardTypes = CardTypeL;
 
+  /** subscription to theme changes */
   themeSub?: Subscription;
 
+  /** current theme applied to cards */
   cardTheme: CardTheme = DEFAULT_THEME;
 
   /** component constructor */
@@ -38,19 +48,23 @@ export class CardComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
   ) { /* do nothing */ }
 
+  /** set up */
   ngOnInit(): void {
     this.themeSub = this.configService.cardTheme.subscribe(this.onCardTheme.bind(this));
   }
 
+  /** clean up */
   ngOnDestroy(): void {
     this.themeSub?.unsubscribe();
   }
 
+  /** update card theme on card theme is updated in config service */
   onCardTheme(cardTheme: CardTheme): void {
     this.cardTheme = cardTheme;
     this.changeDetectorRef.detectChanges();
   }
 
+  /** generate css styles for each card, each card has unique css styles since all of them are in one photo */
   getCardStyle(card?: Card): AnyObject {
     const coords = this.getTypeCoords(card);
     return {
@@ -59,13 +73,15 @@ export class CardComponent implements OnInit, OnDestroy {
     };
   }
 
+  /** generate 2d coordinates to find the card in the image containing all cards */
   getTypeCoords(card?: Card): Coords2D {
     if (card) {
-      return this.getCoordsToPx({ x: card.number, y: this.getColumnPosition(card) });
+      return this.getCoordsToPx({ x: card.number, y: this.getRowPosition(card) });
     }
-    return this.getCoordsToPx({ x: 14, y: 4 });
+    return this.getCoordsToPx({ x: 14, y: 4 }); // this is the backface
   }
 
+  /** convert the 2d coords position of the card into pixels */
   getCoordsToPx(coords: Coords2D): Coords2D {
     return {
       x: (CARD_WIDTH * (coords.x - 1)) + (HOR_GAP * (coords.x - 1)),
@@ -73,7 +89,8 @@ export class CardComponent implements OnInit, OnDestroy {
     };
   }
 
-  getColumnPosition(card?: Card): number {
+  /** return the row of the given kind of card, they must match with the image containing all cards */
+  getRowPosition(card?: Card): number {
     if (card) {
       switch (card.type) {
         case CardTypeL.club:
